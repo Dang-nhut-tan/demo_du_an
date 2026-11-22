@@ -6,13 +6,14 @@ FROM alpine:3.20
 
 ARG PB_VERSION=0.22.21
 
-# Install runtime dependencies: ca-certificates for HTTPS, curl for healthcheck, unzip
+# Install runtime dependencies: ca-certificates for HTTPS, curl for healthcheck, unzip, nodejs for auto-seed
 RUN apk add --no-cache \
     unzip \
     ca-certificates \
     curl \
     wget \
-    tini
+    tini \
+    nodejs
 
 WORKDIR /pb
 
@@ -24,6 +25,9 @@ RUN wget -q https://github.com/pocketbase/pocketbase/releases/download/v${PB_VER
 
 # Copy PocketBase JavaScript migrations
 COPY pb_migrations /pb/pb_migrations
+
+# Copy automated seed script
+COPY seed.js /pb/seed.js
 
 # Copy startup entrypoint script
 COPY entrypoint.sh /pb/entrypoint.sh
