@@ -2,6 +2,13 @@ const { spawn, execSync } = require('child_process');
 const path = require('path');
 const net = require('net');
 
+// If running in production (e.g. Render Web Service), start lightweight production static server
+if (process.env.NODE_ENV === 'production' || process.env.RENDER === 'true' || (process.env.PORT && !process.env.LOCAL_DEV)) {
+  console.log('[System] Production environment detected. Starting production server...');
+  require('./prod-server.js');
+  return;
+}
+
 const ROOT_DIR = path.resolve(__dirname, '..');
 const BACKEND_DIR = path.join(ROOT_DIR, 'backend');
 const FRONTEND_DIR = path.join(ROOT_DIR, 'frontend');
