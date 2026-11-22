@@ -191,13 +191,21 @@ export const ScheduleChangePage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition active:scale-95"
+              aria-label="Thông báo"
+            >
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#f37021]"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner">
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner hover:scale-105 transition active:scale-95"
+              aria-label="Tài khoản cá nhân"
+            >
               <UserIcon size={16} />
-            </div>
+            </button>
           </div>
         </div>
       </div>

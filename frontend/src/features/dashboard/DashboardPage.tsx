@@ -18,6 +18,8 @@ import {
   getCurrentUser,
   fetchDashboardStats,
   fetchRecentBookings,
+  getCompanyProfile,
+  pb,
   MOCK_BOOKINGS,
 } from '../../services/pocketbase';
 import { BookingRequest } from '../../types';
@@ -25,6 +27,7 @@ import { BookingRequest } from '../../types';
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const user = getCurrentUser();
+  const [companyName, setCompanyName] = useState<string>(user.company || 'Công ty ABC Trading');
 
   const [stats, setStats] = useState({
     total: 12,
@@ -39,13 +42,17 @@ export const DashboardPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statsData, bookingsData] = await Promise.all([
+      const [statsData, bookingsData, prof] = await Promise.all([
         fetchDashboardStats(),
         fetchRecentBookings(5),
+        getCompanyProfile(),
       ]);
       setStats(statsData);
       if (bookingsData && bookingsData.length > 0) {
         setRecentBookings(bookingsData);
+      }
+      if (prof?.company?.name) {
+        setCompanyName(prof.company.name);
       }
     } catch (_err) {
       // Graceful fallback
@@ -56,6 +63,33 @@ export const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Real-time synchronization for Customer Dashboard
+  useEffect(() => {
+    const handleDashboardSync = () => {
+      loadData();
+    };
+
+    pb.collection('booking_requests').subscribe('*', handleDashboardSync).catch(() => {});
+    pb.collection('notifications').subscribe('*', handleDashboardSync).catch(() => {});
+    pb.collection('companies').subscribe('*', handleDashboardSync).catch(() => {});
+
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadData();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      pb.collection('booking_requests').unsubscribe('*').catch(() => {});
+      pb.collection('notifications').unsubscribe('*').catch(() => {});
+      pb.collection('companies').unsubscribe('*').catch(() => {});
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
   }, []);
 
   return (
@@ -86,7 +120,7 @@ export const DashboardPage: React.FC = () => {
             <div className="mb-4">
               <div className="flex items-center gap-1.5">
                 <h1 className="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
-                  Xin chào, {user.company || 'Công ty ABC Trading'}
+                  Xin chào, {companyName}
                 </h1>
                 <span className="text-xl inline-block animate-bounce">👋</span>
               </div>

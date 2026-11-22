@@ -98,13 +98,21 @@ export const TrackingProgressPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition active:scale-95"
+              aria-label="Thông báo"
+            >
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#f37021]"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner">
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner hover:scale-105 transition active:scale-95"
+              aria-label="Tài khoản cá nhân"
+            >
               <UserIcon size={16} />
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -140,11 +148,21 @@ export const TrackingProgressPage: React.FC = () => {
               />
             </div>
             <button
+              type="button"
+              onClick={() => setRefreshKey((k) => k + 1)}
+              className="w-10 h-10 rounded-2xl bg-blue-50 hover:bg-blue-100 border border-blue-200 flex items-center justify-center text-[#004ba0] transition shrink-0 active:scale-95"
+              title="Làm mới tiến độ"
+              aria-label="Làm mới tiến độ"
+            >
+              <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button
               type="submit"
               className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-600 transition shrink-0 active:scale-95"
-              title="Lọc kết quả"
+              title="Tìm kiếm"
+              aria-label="Tìm kiếm"
             >
-              <SlidersHorizontal size={16} />
+              <Search size={16} />
             </button>
           </form>
         </div>
@@ -152,7 +170,11 @@ export const TrackingProgressPage: React.FC = () => {
         {/* Content Body */}
         <div className="p-4 sm:p-5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain space-y-4">
           {/* Booking Summary Card matching Mockup */}
-          <div className="p-4 bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-3">
+          <div
+            onClick={() => setActiveTab('details')}
+            className="p-4 bg-white rounded-3xl border border-slate-200 shadow-sm flex items-center justify-between gap-3 cursor-pointer hover:bg-blue-50/40 hover:border-blue-200 transition active:scale-[0.99]"
+            title="Nhấp để xem thông tin chi tiết đơn hàng"
+          >
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-2xl bg-blue-50 text-[#004ba0] flex items-center justify-center shrink-0">
                 <Truck size={22} />

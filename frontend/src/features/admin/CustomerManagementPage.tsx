@@ -13,8 +13,9 @@ import {
   UserPlus,
   RefreshCw,
   Power,
+  Edit2,
 } from 'lucide-react';
-import { fetchCustomerAccounts, CustomerAccountRow } from './adminApi';
+import { fetchCustomerAccounts, updateCompany, CustomerAccountRow } from './adminApi';
 import { Company } from '../../types';
 import { pb } from '../../services/pocketbase';
 
@@ -28,6 +29,7 @@ export const CustomerManagementPage: React.FC = () => {
 
   // Modals
   const [addCompanyModal, setAddCompanyModal] = useState(false);
+  const [editCompanyModal, setEditCompanyModal] = useState(false);
   const [addAccountModal, setAddAccountModal] = useState(false);
 
   // Form Company State
@@ -37,6 +39,50 @@ export const CustomerManagementPage: React.FC = () => {
   const [companyEmail, setCompanyEmail] = useState('');
   const [companyPhone, setCompanyPhone] = useState('');
   const [companyAddress, setCompanyAddress] = useState('');
+
+  // Edit Company State
+  const [editingCompanyId, setEditingCompanyId] = useState('');
+  const [editCompanyName, setEditCompanyName] = useState('');
+  const [editCompanyTaxId, setEditCompanyTaxId] = useState('');
+  const [editCompanyCode, setEditCompanyCode] = useState('');
+  const [editCompanyEmail, setEditCompanyEmail] = useState('');
+  const [editCompanyPhone, setEditCompanyPhone] = useState('');
+  const [editCompanyAddress, setEditCompanyAddress] = useState('');
+  const [editCompanyStatus, setEditCompanyStatus] = useState<'active' | 'inactive'>('active');
+
+  const openEditCompany = (c: Company) => {
+    setEditingCompanyId(c.id);
+    setEditCompanyName(c.name);
+    setEditCompanyTaxId(c.taxCode);
+    setEditCompanyCode(c.code);
+    setEditCompanyEmail(c.email);
+    setEditCompanyPhone(c.phone);
+    setEditCompanyAddress(c.address || '');
+    setEditCompanyStatus(c.verified ? 'active' : 'inactive');
+    setEditCompanyModal(true);
+  };
+
+  const handleEditCompany = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCompanyId) return;
+    try {
+      await updateCompany(editingCompanyId, {
+        name: editCompanyName.trim(),
+        taxCode: editCompanyTaxId.trim(),
+        code: editCompanyCode.trim().toUpperCase(),
+        email: editCompanyEmail.trim(),
+        phone: editCompanyPhone.trim(),
+        address: editCompanyAddress.trim(),
+        verified: editCompanyStatus === 'active',
+      });
+      setSuccessMessage(`Đã cập nhật thông tin công ty "${editCompanyName}" thành công!`);
+      setEditCompanyModal(false);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      await loadData();
+    } catch (err: any) {
+      alert('Lỗi cập nhật công ty: ' + err.message);
+    }
+  };
 
   // Form Account State
   const [accountEmail, setAccountEmail] = useState('');
@@ -133,7 +179,10 @@ export const CustomerManagementPage: React.FC = () => {
     const nextState = !account.isActive;
     try {
       try {
-        await pb.collection('users').update(account.id, { verified: nextState });
+        await pb.collection('users').update(account.id, { 
+          verified: nextState,
+          status: nextState ? 'active' : 'inactive'
+        });
       } catch (_e) {
         // fallback
       }
@@ -251,6 +300,7 @@ export const CustomerManagementPage: React.FC = () => {
                   <th className="py-3 px-5">Liên hệ</th>
                   <th className="py-3 px-5">Địa chỉ</th>
                   <th className="py-3 px-5 text-center">Trạng thái</th>
+                  <th className="py-3 px-5 text-right">Thao tác</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-medium">
@@ -271,8 +321,18 @@ export const CustomerManagementPage: React.FC = () => {
                     <td className="py-3.5 px-5 text-center">
                       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                        <span>Đã xác thực</span>
+                        <span>{c.verified ? 'Đã xác thực' : 'Tạm khóa'}</span>
                       </span>
+                    </td>
+                    <td className="py-3.5 px-5 text-right">
+                      <button
+                        onClick={() => openEditCompany(c)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold text-[#004ba0] hover:bg-blue-50 rounded-lg transition"
+                        title="Chỉnh sửa thông tin công ty"
+                      >
+                        <Edit2 size={13} />
+                        <span>Sửa</span>
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -440,6 +500,119 @@ export const CustomerManagementPage: React.FC = () => {
                   className="px-5 py-2 rounded-xl font-bold text-white bg-[#004ba0] hover:bg-[#003b80]"
                 >
                   Lưu công ty
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Company Modal */}
+      {editCompanyModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden animate-fadeIn">
+            <div className="bg-[#004ba0] text-white px-6 py-4 flex items-center justify-between">
+              <h3 className="font-extrabold text-base">Cập Nhật Thông Tin Doanh Nghiệp</h3>
+              <button onClick={() => setEditCompanyModal(false)} className="text-white">
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditCompany} className="p-6 space-y-3.5 text-xs">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Tên công ty *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="VD: Công ty TNHH Xuất Nhập Khẩu Toàn Cầu"
+                  value={editCompanyName}
+                  onChange={(e) => setEditCompanyName(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0] font-bold text-slate-900"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Mã số thuế *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="0312345678"
+                    value={editCompanyTaxId}
+                    onChange={(e) => setEditCompanyTaxId(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0] font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Mã khách hàng</label>
+                  <input
+                    type="text"
+                    value={editCompanyCode}
+                    onChange={(e) => setEditCompanyCode(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0] uppercase font-mono bg-slate-50"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Email nhận thông báo</label>
+                  <input
+                    type="email"
+                    placeholder="logistics@company.com"
+                    value={editCompanyEmail}
+                    onChange={(e) => setEditCompanyEmail(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0]"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Số điện thoại công ty</label>
+                  <input
+                    type="tel"
+                    placeholder="028 3999 8888"
+                    value={editCompanyPhone}
+                    onChange={(e) => setEditCompanyPhone(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Địa chỉ trụ sở / nhà xưởng</label>
+                <input
+                  type="text"
+                  placeholder="KCN Sóng Thần, Dĩ An, Bình Dương..."
+                  value={editCompanyAddress}
+                  onChange={(e) => setEditCompanyAddress(e.target.value)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Trạng thái doanh nghiệp</label>
+                <select
+                  value={editCompanyStatus}
+                  onChange={(e) => setEditCompanyStatus(e.target.value as any)}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 outline-none focus:border-[#004ba0] bg-white font-semibold"
+                >
+                  <option value="active">Hoạt động (Active - Được phép tạo booking)</option>
+                  <option value="inactive">Tạm khóa (Inactive - Khóa tạo booking và truy cập)</option>
+                </select>
+              </div>
+
+              <div className="pt-3 flex justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setEditCompanyModal(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl font-bold text-white bg-[#004ba0] hover:bg-[#003b80]"
+                >
+                  Lưu thay đổi
                 </button>
               </div>
             </form>

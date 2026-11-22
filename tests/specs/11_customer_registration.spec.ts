@@ -27,7 +27,7 @@ test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
 
   test('TC-REG-002: Form validation on blank submission', async ({ page }) => {
     await page.goto('/register');
-    const submitBtn = page.locator('button:has-text("Gửi yêu cầu đăng ký")');
+    const submitBtn = page.locator('button:has-text("Đăng ký tài khoản")');
     await expect(submitBtn).toBeVisible();
     await submitBtn.click();
 
@@ -49,7 +49,7 @@ test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
     await page.locator('input[placeholder="Tối thiểu 8 ký tự"]').fill('12345678');
     await page.locator('input[placeholder="Nhập lại mật khẩu"]').fill('87654321');
 
-    const submitBtn = page.locator('button:has-text("Gửi yêu cầu đăng ký")');
+    const submitBtn = page.locator('button:has-text("Đăng ký tài khoản")');
     await submitBtn.click();
 
     await expect(page.locator('text=Định dạng email không hợp lệ')).toBeVisible();
@@ -75,7 +75,7 @@ test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
     await page.locator('input[placeholder="028 1234 5678"]').fill('02743888999');
 
     // Submit
-    const submitBtn = page.locator('button:has-text("Gửi yêu cầu đăng ký")');
+    const submitBtn = page.locator('button:has-text("Đăng ký tài khoản")');
     await submitBtn.click();
 
     // Verify Success Screen
@@ -99,7 +99,7 @@ test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
     await page.locator('input[placeholder="Công ty TNHH Xuất Nhập Khẩu..."]').fill('Công ty Thứ Hai');
     await page.locator('input[placeholder="Ví dụ: 0312345678"]').fill('0399887766');
 
-    const submitBtn = page.locator('button:has-text("Gửi yêu cầu đăng ký")');
+    const submitBtn = page.locator('button:has-text("Đăng ký tài khoản")');
     await submitBtn.click();
 
     // Expect server error
@@ -194,7 +194,7 @@ test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
     await page.locator('input[placeholder="Nhập lại mật khẩu"]').fill(testPass);
     await page.locator('input[placeholder="Công ty TNHH Xuất Nhập Khẩu..."]').fill(testCompany2);
     await page.locator('input[placeholder="Ví dụ: 0312345678"]').fill(testTaxCode2);
-    await page.locator('button:has-text("Gửi yêu cầu đăng ký")').click();
+    await page.locator('button:has-text("Đăng ký tài khoản")').click();
     await expect(page.locator('text=Đăng ký thành công!').first()).toBeVisible({ timeout: 15000 });
 
     // 2. Admin logs in and navigates to registrations

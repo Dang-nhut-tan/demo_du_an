@@ -31,7 +31,7 @@ import {
   rejectScheduleChangeProposal,
   updateTransportStage,
 } from './dispatcherApi';
-import { logout } from '../../services/pocketbase';
+import { logout, pb } from '../../services/pocketbase';
 
 export const DispatcherDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -53,6 +53,12 @@ export const DispatcherDashboardPage: React.FC = () => {
   const [newStage, setNewStage] = useState('transporting');
   const [stageNote, setStageNote] = useState('');
   const [updatingStage, setUpdatingStage] = useState(false);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (text: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -82,64 +88,99 @@ export const DispatcherDashboardPage: React.FC = () => {
     };
   }, [refreshKey]);
 
+  // Real-time synchronization for Dispatcher Portal (Live updates on new bookings & changes)
+  useEffect(() => {
+    const handleDispatcherSync = () => {
+      setRefreshKey((k) => k + 1);
+    };
+
+    pb.collection('booking_requests').subscribe('*', handleDispatcherSync).catch(() => {});
+    pb.collection('schedule_change_requests').subscribe('*', handleDispatcherSync).catch(() => {});
+    pb.collection('transport_progress').subscribe('*', handleDispatcherSync).catch(() => {});
+
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        setRefreshKey((k) => k + 1);
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    return () => {
+      pb.collection('booking_requests').unsubscribe('*').catch(() => {});
+      pb.collection('schedule_change_requests').unsubscribe('*').catch(() => {});
+      pb.collection('transport_progress').unsubscribe('*').catch(() => {});
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+    };
+  }, []);
+
   const handleApproveBooking = async (id: string) => {
     try {
       await approveBookingRequest(id);
+      showToast('Đã phê duyệt yêu cầu vận chuyển thành công!', 'success');
       setRefreshKey((k) => k + 1);
-    } catch (e) {
-      alert('Lỗi phê duyệt yêu cầu');
+    } catch (e: any) {
+      showToast(e?.message || 'Lỗi phê duyệt yêu cầu', 'error');
     }
   };
 
   const handleConfirmRejectBooking = async () => {
     if (!rejectingBookingId || !rejectionReason.trim()) {
-      alert('Vui lòng nhập lý do từ chối');
+      showToast('Vui lòng nhập lý do từ chối yêu cầu', 'error');
       return;
     }
     try {
       await rejectBookingRequest(rejectingBookingId, rejectionReason);
       setRejectingBookingId(null);
       setRejectionReason('');
+      showToast('Đã từ chối yêu cầu vận chuyển.', 'success');
       setRefreshKey((k) => k + 1);
-    } catch (e) {
-      alert('Lỗi khi từ chối yêu cầu');
+    } catch (e: any) {
+      showToast(e?.message || 'Lỗi khi từ chối yêu cầu', 'error');
     }
   };
 
   const handleApproveProposal = async (prop: DispatcherScheduleChange) => {
     try {
-      await approveScheduleChangeProposal(prop.id, prop.bookingId, '30/08/2025 10:00');
+      const proposedVal = prop.items?.[0]?.newValue || '30/08/2025 10:00';
+      await approveScheduleChangeProposal(prop.id, prop.bookingId, proposedVal);
+      showToast(`Đã duyệt đề xuất đổi lịch sang: ${proposedVal}`, 'success');
       setRefreshKey((k) => k + 1);
-    } catch (e) {
-      alert('Lỗi duyệt đề xuất');
+    } catch (e: any) {
+      showToast(e?.message || 'Lỗi duyệt đề xuất', 'error');
     }
   };
 
   const handleConfirmRejectProposal = async () => {
     if (!rejectingProposalId || !rejectionReason.trim()) {
-      alert('Vui lòng nhập lý do từ chối');
+      showToast('Vui lòng nhập lý do từ chối', 'error');
       return;
     }
     try {
       await rejectScheduleChangeProposal(rejectingProposalId, rejectionReason);
       setRejectingProposalId(null);
       setRejectionReason('');
+      showToast('Đã từ chối đề xuất thay đổi thời gian.', 'success');
       setRefreshKey((k) => k + 1);
-    } catch (e) {
-      alert('Lỗi khi từ chối đề xuất');
+    } catch (e: any) {
+      showToast(e?.message || 'Lỗi khi từ chối đề xuất', 'error');
     }
   };
 
   const handleUpdateProgressStage = async () => {
-    if (!selectedBookingForProgress) return;
+    if (!selectedBookingForProgress) {
+      showToast('Vui lòng chọn đơn hàng cần cập nhật tiến độ', 'error');
+      return;
+    }
     setUpdatingStage(true);
     try {
       await updateTransportStage(selectedBookingForProgress, newStage, stageNote);
-      alert('Cập nhật tiến độ thành công! Khách hàng sẽ thấy ngay lập tức.');
+      showToast('Cập nhật tiến độ thành công! Khách hàng sẽ thấy ngay lập tức.', 'success');
       setStageNote('');
       setRefreshKey((k) => k + 1);
-    } catch (e) {
-      alert('Lỗi cập nhật tiến độ');
+    } catch (e: any) {
+      showToast(e?.message || 'Lỗi cập nhật tiến độ', 'error');
     } finally {
       setUpdatingStage(false);
     }
@@ -155,6 +196,20 @@ export const DispatcherDashboardPage: React.FC = () => {
 
   return (
     <div className="h-full w-full flex flex-col overflow-hidden bg-slate-100">
+      {/* Toast Alert */}
+      {toastMessage && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-200 ${
+            toastMessage.type === 'success'
+              ? 'bg-emerald-600 text-white border-emerald-500'
+              : 'bg-rose-600 text-white border-rose-500'
+          }`}
+        >
+          {toastMessage.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          <span>{toastMessage.text}</span>
+        </div>
+      )}
+
       {/* Dispatcher Header */}
       <header className="shrink-0 bg-slate-900 text-white px-4 py-3.5 shadow-md z-30">
         <div className="max-w-4xl mx-auto flex items-center justify-between">

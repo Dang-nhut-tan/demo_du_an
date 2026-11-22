@@ -43,33 +43,39 @@ export const validateRegistrationInput = (data: CustomerRegistrationData): Recor
   const errors: Record<string, string> = {};
 
   if (!data.fullName || data.fullName.trim().length < 2) {
-    errors.fullName = 'Vui lòng nhập họ và tên hợp lệ (tối thiểu 2 ký tự)';
+    errors.fullName = 'Vui lòng nhập họ và tên';
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!data.email || !emailRegex.test(data.email.trim())) {
-    errors.email = 'Vui lòng nhập địa chỉ email đúng định dạng (ví dụ: contact@company.com)';
+  if (!data.email || !data.email.trim()) {
+    errors.email = 'Vui lòng nhập email đăng nhập';
+  } else if (!emailRegex.test(data.email.trim())) {
+    errors.email = 'Định dạng email không hợp lệ';
   }
 
   const phoneClean = (data.phone || '').trim().replace(/[\s.-]/g, '');
-  if (!phoneClean || phoneClean.length < 9 || phoneClean.length > 15 || !/^[0-9+]+$/.test(phoneClean)) {
+  if (!data.phone || !data.phone.trim()) {
+    errors.phone = 'Vui lòng nhập số điện thoại';
+  } else if (phoneClean.length < 9 || phoneClean.length > 15 || !/^[0-9+]+$/.test(phoneClean)) {
     errors.phone = 'Vui lòng nhập số điện thoại hợp lệ (9 - 15 chữ số)';
   }
 
   if (!data.password || data.password.length < 8) {
-    errors.password = 'Mật khẩu phải có tối thiểu 8 ký tự';
+    errors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
   }
 
   if (data.password !== data.passwordConfirm) {
-    errors.passwordConfirm = 'Mật khẩu xác nhận không khớp với mật khẩu đã nhập';
+    errors.passwordConfirm = 'Mật khẩu xác nhận không khớp';
   }
 
   if (!data.companyName || data.companyName.trim().length < 2) {
-    errors.companyName = 'Vui lòng nhập tên công ty / doanh nghiệp';
+    errors.companyName = 'Vui lòng nhập tên công ty';
   }
 
   const taxClean = (data.taxCode || '').trim();
-  if (!taxClean || taxClean.length < 8 || taxClean.length > 16 || !/^[0-9A-Za-z-]+$/.test(taxClean)) {
+  if (!data.taxCode || !taxClean) {
+    errors.taxCode = 'Vui lòng nhập mã số thuế';
+  } else if (taxClean.length < 8 || taxClean.length > 16 || !/^[0-9A-Za-z-]+$/.test(taxClean)) {
     errors.taxCode = 'Mã số thuế không hợp lệ (thường gồm 10 - 13 chữ số)';
   }
 

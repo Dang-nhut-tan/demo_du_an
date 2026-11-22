@@ -35,7 +35,7 @@ import {
   DEFAULT_FORM_CONFIGS,
   fetchFormFieldConfigs,
 } from './bookingApi';
-import { getCurrentUser } from '../../services/pocketbase';
+import { getCurrentUser, getCompanyProfile, pb } from '../../services/pocketbase';
 
 export const CreateBookingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,12 +94,20 @@ export const CreateBookingPage: React.FC = () => {
   const refreshMaster = useCallback(async () => {
     setRefreshingMaster(true);
     try {
-      const [md, cfgs] = await Promise.all([
+      const [md, cfgs, prof] = await Promise.all([
         fetchMasterData(),
         fetchFormFieldConfigs(),
+        getCompanyProfile(),
       ]);
       setMasterData(md);
       setFormConfigs(cfgs);
+      if (prof?.company?.name) {
+        setFormData((prev) => ({
+          ...prev,
+          companyName: prof.company.name,
+          companyId: prof.company.id,
+        }));
+      }
     } catch (err) {
       console.warn('Error refreshing master data:', err);
     } finally {
@@ -107,19 +115,64 @@ export const CreateBookingPage: React.FC = () => {
     }
   }, []);
 
+  // Real-time synchronization and window focus refetch
+  useEffect(() => {
+    const handleMasterUpdate = () => {
+      refreshMaster();
+    };
+
+    // PocketBase Server-Sent Events realtime subscriptions
+    pb.collection('shipping_lines').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('locations').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('ports').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('cargo_types').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('container_types').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('form_field_config').subscribe('*', handleMasterUpdate).catch(() => {});
+    pb.collection('companies').subscribe('*', handleMasterUpdate).catch(() => {});
+
+    // Browser tab focus & visibility change refetch
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        refreshMaster();
+      }
+    };
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      pb.collection('shipping_lines').unsubscribe('*').catch(() => {});
+      pb.collection('locations').unsubscribe('*').catch(() => {});
+      pb.collection('ports').unsubscribe('*').catch(() => {});
+      pb.collection('cargo_types').unsubscribe('*').catch(() => {});
+      pb.collection('container_types').unsubscribe('*').catch(() => {});
+      pb.collection('form_field_config').unsubscribe('*').catch(() => {});
+      pb.collection('companies').unsubscribe('*').catch(() => {});
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [refreshMaster]);
+
   // Load master data, form config, and auto-fill defaults on mount
   useEffect(() => {
     let mounted = true;
     const init = async () => {
       setLoading(true);
       try {
-        const [md, cfgs] = await Promise.all([
+        const [md, cfgs, prof] = await Promise.all([
           fetchMasterData(),
           fetchFormFieldConfigs(),
+          getCompanyProfile(),
         ]);
         if (mounted) {
           setMasterData(md);
           setFormConfigs(cfgs);
+          if (prof?.company?.name) {
+            setFormData((prev) => ({
+              ...prev,
+              companyName: prof.company.name,
+              companyId: prof.company.id,
+            }));
+          }
         }
 
         const defaults = await loadShippingDefaults();
@@ -278,13 +331,21 @@ export const CreateBookingPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition active:scale-95"
+              aria-label="Thông báo"
+            >
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#f37021]"></span>
             </button>
-            <div className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner">
+            <button
+              onClick={() => navigate('/profile')}
+              className="w-8 h-8 rounded-full bg-white text-[#004ba0] font-bold text-xs flex items-center justify-center border border-white/40 shadow-inner hover:scale-105 transition active:scale-95"
+              aria-label="Tài khoản cá nhân"
+            >
               <UserIcon size={16} />
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -443,15 +504,17 @@ export const CreateBookingPage: React.FC = () => {
                     error={errors.shippingLine}
                   />
 
-                  <FormInput
-                    name="vesselVoyage"
-                    id="vesselVoyage"
-                    label={formConfigs.vesselName?.label || formConfigs.vesselVoyage?.label || 'Tên tàu / Số chuyến'}
-                    placeholder="Ví dụ: ONE TRIUMPH / 024W"
-                    helpText={formConfigs.vesselName?.helpText || formConfigs.vesselVoyage?.helpText}
-                    value={formData.vesselVoyage || ''}
-                    onChange={(e) => setFormData({ ...formData, vesselVoyage: e.target.value })}
-                  />
+                  {formConfigs.vesselName?.isVisible !== false && formConfigs.vesselVoyage?.isVisible !== false && (
+                    <FormInput
+                      name="vesselVoyage"
+                      id="vesselVoyage"
+                      label={formConfigs.vesselName?.label || formConfigs.vesselVoyage?.label || 'Tên tàu / Số chuyến'}
+                      placeholder="Ví dụ: ONE TRIUMPH / 024W"
+                      helpText={formConfigs.vesselName?.helpText || formConfigs.vesselVoyage?.helpText}
+                      value={formData.vesselVoyage || ''}
+                      onChange={(e) => setFormData({ ...formData, vesselVoyage: e.target.value })}
+                    />
+                  )}
                 </div>
 
                 {/* Auto-filled Company */}
@@ -677,25 +740,27 @@ export const CreateBookingPage: React.FC = () => {
                   <span>Thông tin bổ sung</span>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    {formConfigs.notes?.label || 'Ghi chú & Yêu cầu đặc biệt (nếu có)'}
-                  </label>
-                  <textarea
-                    rows={3}
-                    maxLength={500}
-                    value={formData.notes || ''}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder={
-                      formConfigs.notes?.placeholder ||
-                      'Nhập các lưu ý về giờ giấc đóng hàng, yêu cầu tài xế, tài liệu kèm theo...'
-                    }
-                    className="w-full p-3 text-xs text-slate-800 placeholder-slate-400 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 focus:border-[#004ba0] focus:ring-2 focus:ring-[#004ba0]/15 outline-none transition-all resize-none"
-                  />
-                  <div className="text-right text-[10px] text-slate-400 mt-0.5">
-                    {(formData.notes || '').length} / 500
+                {formConfigs.notes?.isVisible !== false && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                      {formConfigs.notes?.label || 'Ghi chú & Yêu cầu đặc biệt (nếu có)'}
+                    </label>
+                    <textarea
+                      rows={3}
+                      maxLength={500}
+                      value={formData.notes || ''}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      placeholder={
+                        formConfigs.notes?.placeholder ||
+                        'Nhập các lưu ý về giờ giấc đóng hàng, yêu cầu tài xế, tài liệu kèm theo...'
+                      }
+                      className="w-full p-3 text-xs text-slate-800 placeholder-slate-400 bg-white rounded-2xl border border-slate-200 hover:border-slate-300 focus:border-[#004ba0] focus:ring-2 focus:ring-[#004ba0]/15 outline-none transition-all resize-none"
+                    />
+                    <div className="text-right text-[10px] text-slate-400 mt-0.5">
+                      {(formData.notes || '').length} / 500
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* File Attachments */}
                 <div>

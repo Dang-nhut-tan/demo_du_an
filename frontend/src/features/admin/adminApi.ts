@@ -473,6 +473,48 @@ export const fetchCustomerAccounts = async (): Promise<{ companies: Company[]; a
   return { companies: companiesList, accounts: accountsList };
 };
 
+// Admin Company Update
+export const updateCompany = async (
+  id: string,
+  data: Partial<Company>
+): Promise<Company> => {
+  const payload: any = {};
+  if (data.name !== undefined) payload.name = data.name.trim();
+  if (data.code !== undefined) payload.code = data.code.trim();
+  if (data.taxCode !== undefined) payload.taxId = data.taxCode.trim();
+  if (data.address !== undefined) payload.address = data.address.trim();
+  if (data.email !== undefined) payload.email = data.email.trim();
+  if (data.phone !== undefined) payload.phone = data.phone.trim();
+  if (data.verified !== undefined) payload.status = data.verified ? 'active' : 'inactive';
+
+  const record = await pb.collection('companies').update(id, payload);
+
+  // Synchronize company_name on users belonging to this company
+  if (data.name) {
+    try {
+      const usersInComp = await pb.collection('users').getFullList({
+        filter: `company = "${id}"`,
+      });
+      for (const u of usersInComp) {
+        await pb.collection('users').update(u.id, { company_name: data.name });
+      }
+    } catch (_e) {
+      // ignore
+    }
+  }
+
+  return {
+    id: record.id,
+    name: record.name,
+    code: record.code,
+    taxCode: record.taxId || record.tax_code || '',
+    address: record.address || '',
+    email: record.email || '',
+    phone: record.phone || '',
+    verified: record.status === 'active',
+  };
+};
+
 // Admin Dashboard Metrics
 export const fetchAdminDashboardMetrics = async () => {
   try {

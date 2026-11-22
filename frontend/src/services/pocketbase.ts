@@ -184,7 +184,7 @@ export const loginWithPassword = async (email: string, pass: string, remember: b
   try {
     const authData = await pb.collection('users').authWithPassword(email, pass);
 
-    // Kiểm tra trạng thái phê duyệt tài khoản khách hàng (Bảo mật nghiệp vụ)
+    // Kiểm tra trạng thái phê duyệt tài khoản khách hàng và doanh nghiệp (Bảo mật nghiệp vụ)
     const userModel = authData.record || pb.authStore.model;
     if (userModel && userModel.role === 'customer') {
       if (userModel.status === 'pending' || !userModel.company) {
@@ -192,10 +192,22 @@ export const loginWithPassword = async (email: string, pass: string, remember: b
         sessionStorage.removeItem('pb_auth');
         throw new Error('Tài khoản của bạn đang chờ quản trị viên U&I Logistics phê duyệt. Vui lòng quay lại sau.');
       }
-      if (userModel.status === 'rejected') {
+      if (userModel.status === 'rejected' || userModel.status === 'inactive') {
         pb.authStore.clear();
         sessionStorage.removeItem('pb_auth');
-        throw new Error('Tài khoản của bạn đã bị từ chối phê duyệt. Vui lòng liên hệ quản trị viên.');
+        throw new Error('Tài khoản của bạn đã bị từ chối phê duyệt hoặc tạm khóa. Vui lòng liên hệ quản trị viên.');
+      }
+      if (userModel.company) {
+        try {
+          const compRecord = await pb.collection('companies').getOne(userModel.company);
+          if (compRecord.status === 'inactive' || compRecord.status === 'locked') {
+            pb.authStore.clear();
+            sessionStorage.removeItem('pb_auth');
+            throw new Error('Doanh nghiệp của bạn đang bị tạm khóa. Vui lòng liên hệ quản trị viên U&I Logistics.');
+          }
+        } catch (compErr: any) {
+          if (compErr.message?.includes('tạm khóa')) throw compErr;
+        }
       }
     }
 
@@ -292,18 +304,17 @@ export const fetchRecentBookings = async (limit: number = 5): Promise<BookingReq
   }
 };
 
-// Company Profile & Auto-fill preferences
+// Company Profile & Auto-fill preferences (Database Single Source of Truth)
 export const getCompanyProfile = async (): Promise<{ company: Company; defaults: ShippingDefaults }> => {
   try {
     const userModel = pb.authStore.model;
-    const stored = localStorage.getItem('u_and_i_company_profile');
     const storedDefaults = localStorage.getItem('u_and_i_shipping_defaults');
-    
-    let comp = stored ? JSON.parse(stored) : DEFAULT_COMPANY;
     let defs = storedDefaults ? JSON.parse(storedDefaults) : DEFAULT_SHIPPING_SETTINGS;
 
+    let comp: Company = { ...DEFAULT_COMPANY };
+
+    // Ưu tiên đọc trực tiếp từ database PocketBase (Single Source of Truth)
     try {
-      // Nếu người dùng đã đăng nhập và có liên kết công ty thực tế, lấy trực tiếp từ database
       if (userModel && userModel.company) {
         const item = await pb.collection('companies').getOne(userModel.company);
         comp = {
@@ -328,12 +339,14 @@ export const getCompanyProfile = async (): Promise<{ company: Company; defaults:
             email: item.email || comp.email,
             phone: item.phone || comp.phone,
             address: item.address || comp.address,
-            verified: item.verified ?? true,
+            verified: item.status === 'active' || true,
           };
         }
       }
     } catch (_err) {
       // offline fallback
+      const stored = localStorage.getItem('u_and_i_company_profile');
+      if (stored) comp = JSON.parse(stored);
     }
 
     return { company: comp, defaults: defs };
@@ -347,10 +360,10 @@ export const saveCompanyProfile = async (company: Company, defaults: ShippingDef
   localStorage.setItem('u_and_i_shipping_defaults', JSON.stringify(defaults));
 
   try {
-    if (company.id && company.id !== 'abc-trading-id') {
+    if (company.id) {
       await pb.collection('companies').update(company.id, {
         name: company.name,
-        tax_code: company.taxCode,
+        taxId: company.taxCode,
         email: company.email,
         phone: company.phone,
         address: company.address,

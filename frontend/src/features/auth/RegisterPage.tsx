@@ -98,7 +98,7 @@ export const RegisterPage: React.FC = () => {
 
             <div className="mt-8 space-y-4">
               <h2 className="text-xl sm:text-2xl font-black text-white leading-snug">
-                Đăng ký tài khoản khách hàng doanh nghiệp
+                Đăng ký tài khoản Khách hàng
               </h2>
               <p className="text-xs text-blue-100/90 leading-relaxed">
                 Khởi tạo tài khoản Cổng thông tin khách hàng U&amp;I Logistics để quản lý booking vận chuyển, đổi lịch và theo dõi tiến độ thời gian thực.
@@ -188,7 +188,7 @@ export const RegisterPage: React.FC = () => {
             <div>
               <div className="mb-5">
                 <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                  Đăng ký tài khoản
+                  Đăng ký tài khoản Khách hàng
                 </h1>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Vui lòng điền đầy đủ các thông tin bắt buộc có dấu (*)
@@ -300,7 +300,7 @@ export const RegisterPage: React.FC = () => {
 
                   <FormInput
                     label="Địa chỉ trụ sở công ty"
-                    placeholder="Số nhà, đường, khu công nghiệp, tỉnh/thành..."
+                    placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
                     value={formData.companyAddress || ''}
                     onChange={(e) => handleInputChange('companyAddress', e.target.value)}
                     icon={<MapPin size={16} />}
@@ -310,7 +310,7 @@ export const RegisterPage: React.FC = () => {
                     <FormInput
                       label="Email nhận thông báo công ty"
                       type="email"
-                      placeholder="logistics@company.com"
+                      placeholder="notify@company.com"
                       value={formData.notificationEmail || ''}
                       onChange={(e) => handleInputChange('notificationEmail', e.target.value)}
                       error={errors.notificationEmail}
@@ -320,7 +320,7 @@ export const RegisterPage: React.FC = () => {
                     <FormInput
                       label="Số điện thoại công ty"
                       type="tel"
-                      placeholder="028 3888 xxxx"
+                      placeholder="028 1234 5678"
                       value={formData.companyPhone || ''}
                       onChange={(e) => handleInputChange('companyPhone', e.target.value)}
                       icon={<Phone size={16} />}

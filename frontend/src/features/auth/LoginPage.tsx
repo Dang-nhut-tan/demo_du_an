@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, LogIn, ArrowRight, Smartphone, AlertCircle } from 'lucide-react';
+import { Mail, Lock, LogIn, ArrowRight, Smartphone, AlertCircle, X, HelpCircle, Phone, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { FormInput } from '../../components/ui/FormInput';
 import { PrimaryButton } from '../../components/ui/PrimaryButton';
@@ -12,6 +12,8 @@ export const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [showSsoModal, setShowSsoModal] = useState(false);
 
   useEffect(() => {
     // If already authenticated, redirect to home
@@ -39,13 +41,16 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const fillQuickDemo = (role: 'customer' | 'dispatcher') => {
+  const fillQuickDemo = (role: 'customer' | 'dispatcher' | 'admin') => {
     if (role === 'customer') {
       setEmail('customer@demo.local');
       setPassword('Demo@123456');
-    } else {
+    } else if (role === 'dispatcher') {
       setEmail('dispatcher@demo.local');
       setPassword('Demo@123456');
+    } else {
+      setEmail('admin@demo.local');
+      setPassword('Admin@123456');
     }
   };
 
@@ -123,6 +128,13 @@ export const LoginPage: React.FC = () => {
             >
               Điều phối viên (dispatcher)
             </button>
+            <button
+              type="button"
+              onClick={() => fillQuickDemo('admin')}
+              className="bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-full text-amber-200 text-xs font-medium transition-all"
+            >
+              Quản trị viên (admin)
+            </button>
           </div>
         </div>
 
@@ -184,16 +196,13 @@ export const LoginPage: React.FC = () => {
                   />
                   <span>Ghi nhớ đăng nhập</span>
                 </label>
-                <a
-                  href="#forgot"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert('Vui lòng liên hệ quản trị viên tổng đài U&I Logistics (1900 xxxx) để cấp lại mật khẩu!');
-                  }}
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
                   className="text-[#004ba0] hover:text-[#003366] font-semibold hover:underline"
                 >
                   Quên mật khẩu?
-                </a>
+                </button>
               </div>
 
               {/* Login Button */}
@@ -211,13 +220,13 @@ export const LoginPage: React.FC = () => {
 
               {/* Registration Link */}
               <div className="text-center pt-2.5">
-                <span className="text-xs text-slate-500">Chưa có tài khoản? </span>
                 <button
                   type="button"
                   onClick={() => navigate('/register')}
-                  className="text-xs font-bold text-[#004ba0] hover:text-[#003366] hover:underline"
+                  className="text-xs text-slate-500 hover:text-[#003366] transition-colors"
                 >
-                  Đăng ký ngay
+                  <span>Chưa có tài khoản? </span>
+                  <span className="font-bold text-[#004ba0] hover:underline">Đăng ký ngay</span>
                 </button>
               </div>
 
@@ -236,9 +245,7 @@ export const LoginPage: React.FC = () => {
               {/* Microsoft SSO Button */}
               <button
                 type="button"
-                onClick={() => {
-                  alert('Đăng nhập Microsoft Azure AD SSO: Đang kích hoạt kết nối dịch vụ tài khoản doanh nghiệp.');
-                }}
+                onClick={() => setShowSsoModal(true)}
                 className="w-full py-2.5 px-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2.5 transition-all shadow-sm active:scale-[0.99]"
               >
                 {/* Microsoft 4-square logo */}
@@ -265,6 +272,68 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* MODAL: QUÊN MẬT KHẨU */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#004ba0] flex items-center justify-center mx-auto">
+              <HelpCircle size={30} />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900">Quên mật khẩu?</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Để bảo mật dữ liệu doanh nghiệp và vận đơn, mật khẩu tài khoản được quản lý tập trung. Vui lòng liên hệ tổng đài hoặc gửi yêu cầu để được cấp lại:
+              </p>
+            </div>
+            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 text-xs text-left space-y-1.5 font-medium text-slate-700">
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-[#f37021]" />
+                <span>Hotline: <strong className="text-slate-900">1900 5858</strong> (Nhánh 1)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail size={14} className="text-[#004ba0]" />
+                <span>Email: <strong className="text-slate-900">support@unilogistics.vn</strong></span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(false)}
+              className="w-full py-2.5 bg-[#004ba0] hover:bg-[#003366] text-white text-xs font-bold rounded-xl transition shadow-md"
+            >
+              Đã hiểu &amp; Đóng
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: MICROSOFT AZURE AD SSO */}
+      {showSsoModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+            <div className="w-14 h-14 rounded-2xl bg-slate-50 text-slate-800 flex items-center justify-center mx-auto border border-slate-200">
+              <ShieldCheck size={30} className="text-[#00a4ef]" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900">Đăng nhập Microsoft Azure AD</h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Tính năng Single Sign-On (SSO) dành cho cán bộ công nhân viên tập đoàn và đối tác chiến lược có tài khoản Office 365 / Azure AD được liên kết.
+              </p>
+            </div>
+            <div className="p-3 bg-blue-50/60 rounded-2xl border border-blue-100 text-xs text-left space-y-1 text-slate-600">
+              <p>• Dành cho email đuôi <strong>@unilogistics.vn</strong></p>
+              <p>• Nếu bạn là khách hàng bên ngoài, vui lòng dùng form đăng nhập email/mật khẩu hoặc <button onClick={() => { setShowSsoModal(false); navigate('/register'); }} className="text-[#004ba0] font-bold underline">Đăng ký mới</button>.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowSsoModal(false)}
+              className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition shadow-md"
+            >
+              Đóng cửa sổ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -309,17 +309,31 @@ export const FALLBACK_MASTER_DATA: MasterData = {
   containerTypesList: ["40' cao", "40' thường", "20' thường", "20' lạnh", "40' lạnh"],
 };
 
-// Helper to map DB records to ComboboxOption
+// Helper to map DB records to ComboboxOption with deduplication and sorting
 const mapToComboboxOptions = (records: any[], fallback: ComboboxOption[]): ComboboxOption[] => {
   if (!records || records.length === 0) return fallback;
-  return records.map((r) => ({
-    value: r.name || r.code || r.id,
-    label: r.name || r.code,
-    code: r.code,
-    description: r.description,
-    isActive: r.isActive !== undefined ? r.isActive : true,
-    sortOrder: r.sortOrder ?? 0,
-  }));
+  const seen = new Set<string>();
+  const options: ComboboxOption[] = [];
+
+  for (const r of records) {
+    const value = (r.name || r.code || r.id || '').toString().trim();
+    const label = (r.name || r.code || '').toString().trim();
+    const dedupeKey = (label || value).toLowerCase();
+
+    if (!dedupeKey || seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+
+    options.push({
+      value: value || label,
+      label: label || value,
+      code: r.code,
+      description: r.description,
+      isActive: r.isActive !== undefined ? Boolean(r.isActive) : true,
+      sortOrder: r.sortOrder ?? 0,
+    });
+  }
+
+  return options.length > 0 ? options : fallback;
 };
 
 // Fetch master data from PocketBase filtering for 'isActive = true' sorted by sortOrder asc, name asc
@@ -349,28 +363,28 @@ export const fetchMasterData = async (): Promise<MasterData> => {
     ]);
 
     const shippingLines =
-      linesRes.status === 'fulfilled' && linesRes.value.length > 0
-        ? mapToComboboxOptions(linesRes.value, FALLBACK_MASTER_DATA.shippingLines)
+      linesRes.status === 'fulfilled'
+        ? mapToComboboxOptions(linesRes.value, [])
         : FALLBACK_MASTER_DATA.shippingLines;
 
     const locations =
-      locsRes.status === 'fulfilled' && locsRes.value.length > 0
-        ? mapToComboboxOptions(locsRes.value, FALLBACK_MASTER_DATA.locations)
+      locsRes.status === 'fulfilled'
+        ? mapToComboboxOptions(locsRes.value, [])
         : FALLBACK_MASTER_DATA.locations;
 
     const ports =
-      portsRes.status === 'fulfilled' && portsRes.value.length > 0
-        ? mapToComboboxOptions(portsRes.value, FALLBACK_MASTER_DATA.ports)
+      portsRes.status === 'fulfilled'
+        ? mapToComboboxOptions(portsRes.value, [])
         : FALLBACK_MASTER_DATA.ports;
 
     const cargoTypes =
-      cargoRes.status === 'fulfilled' && cargoRes.value.length > 0
-        ? mapToComboboxOptions(cargoRes.value, FALLBACK_MASTER_DATA.cargoTypes)
+      cargoRes.status === 'fulfilled'
+        ? mapToComboboxOptions(cargoRes.value, [])
         : FALLBACK_MASTER_DATA.cargoTypes;
 
     const containerTypes =
-      typesRes.status === 'fulfilled' && typesRes.value.length > 0
-        ? mapToComboboxOptions(typesRes.value, FALLBACK_MASTER_DATA.containerTypes)
+      typesRes.status === 'fulfilled'
+        ? mapToComboboxOptions(typesRes.value, [])
         : FALLBACK_MASTER_DATA.containerTypes;
 
     return {
