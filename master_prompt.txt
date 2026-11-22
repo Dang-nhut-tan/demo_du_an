@@ -1,0 +1,99 @@
+<USER_REQUEST>
+MASTER PROMPT — U&I LOGISTICS CUSTOMER PORTAL
+FULL-STACK PWA + POCKETBASE + PIXEL-PERFECT MOCKUP IMPLEMENTATION
+You are a Principal Full-Stack Engineer, Senior UI/UX Engineer, PocketBase Specialist, Logistics Business Analyst, and QA Automation Engineer.
+Your mission is to build a COMPLETE, FULLY FUNCTIONAL, MOBILE-FIRST Progressive Web App for:
+U&I Logistics – Customer Portal
+This is a university demonstration project based on real export container Booking operations.
+The project must be visually faithful to the provided mockup images and fully operational with PocketBase.
+CRITICAL: The mockup images have already been downloaded and placed inside the project workspace. You MUST discover, inspect, and use these files as the primary UI design references.
+Do not redesign the application from scratch.
+Do not substitute the provided mockups with a generic dashboard template.
+Do not stop after creating static screens.
+PART 1 — NON-NEGOTIABLE REQUIREMENTS
+1.1 Pixel-Perfect UI
+Every implemented screen MUST match its corresponding reference mockup as closely as technically possible.
+Target: Pixel-perfect 1:1 at the reference viewport.
+Match:
+Overall composition
+Layout hierarchy
+Element positions
+Widths and heights
+Padding and margins
+Typography
+Font sizes and weights
+Line heights
+Text alignment
+Brand colors
+Background gradients
+Borders
+Border radius
+Shadows
+Icons
+Buttons
+Inputs
+Dropdowns
+Cards
+Header
+Navigation
+Status badges
+Section spacing
+Do not approximate visual styling when the reference can be measured.
+Use the actual reference image as the design specification.
+Do not use the mockup image itself as a page background or replace the UI with an image.
+Every UI element must be implemented using actual HTML, React components, CSS, and functional controls.
+1.2 Functional Requirements
+All major functions must work with real data.
+Required features:
+Customer login.
+Customer home dashboard.
+Create Booking request.
+Save Booking draft.
+Submit Booking.
+Schedule change request.
+Booking progress tracking.
+C
+<truncated 19119 bytes>
+entials.
+Implemented features.
+Automated test results.
+Screenshot comparison results.
+Remaining visual differences.
+Known limitations.
+Live demo walkthrough.
+Include a visual comparison report for each mockup.
+FINAL EXECUTION INSTRUCTION
+Do not respond with only a plan or explanation. Implement the application.
+First, inspect the workspace and locate the uploaded mockup images.
+Second, analyze each image and map it to the required screen.
+Third, inspect the original TMS screenshots and preserve all relevant Booking fields.
+Fourth, initialize PocketBase and create the database schema.
+Fifth, implement the complete React PWA.
+Sixth, connect every business function to PocketBase.
+Seventh, run the end-to-end workflow.
+Eighth, capture screenshots and compare them with the original mockups.
+Ninth, fix visual and functional defects.
+Finally, provide verified startup instructions and test results.
+Priority order:
+Correct business workflow.
+Real PocketBase persistence.
+Pixel-perfect mockup fidelity.
+Mobile usability.
+End-to-end reliability.
+Maintainable architecture.
+The expected result is a COMPLETE, RUNNABLE, FULL-STACK, MOBILE-FIRST U&I LOGISTICS PWA DEMO that closely reproduces the supplied mockup images while supporting real Booking operations through PocketBase.
+Do not substitute the required implementation with static pages, mock APIs, hardcoded records, or unverified claims of completion. /swarm 
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-22T21:48:38+07:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\TAN\Documents\Desktop\U and I\login.html (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+
+The user has mentioned some items in the form @[ITEM]. Here is extra information about the items that were mentioned by the user, in the order that they appear:
+
+/swarm is a [Slash Command]:
+<SKILL>The user requested you read and use the "swarm" skill. The path to the skill file is:
+C:\Users\TAN\.gemini\antigravity\builtin\skills\native_swarm\SKILL.md</SKILL>
+</ADDITIONAL_METADATA>

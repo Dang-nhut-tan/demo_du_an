@@ -1,0 +1,46 @@
+# ==============================================================================
+# Render Blueprint Specification (render.yaml)
+# Project: U&I Logistics Customer Portal & PocketBase Backend
+# Docs: https://render.com/docs/blueprint-spec
+# ==============================================================================
+services:
+  # ----------------------------------------------------------------------------
+  # 1. PocketBase Backend Service (Docker Web Service)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: u-and-i-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 8090
+      - key: PB_ADMIN_EMAIL
+        sync: false
+      - key: PB_ADMIN_PASSWORD
+        sync: false
+
+  # ----------------------------------------------------------------------------
+  # 2. Customer Portal Frontend (React PWA Static Site)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: u-and-i-frontend
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      # SPA rewrite rule: Redirect all deep routes to index.html for client-side routing
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Tự động liên kết URL từ Backend Web Service sang Frontend
+      - key: VITE_POCKETBASE_URL
+        fromService:
+          type: web
+          name: u-and-i-backend
+          property: host

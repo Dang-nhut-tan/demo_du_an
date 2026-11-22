@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Đăng nhập | U&I Logistics Customer Portal (PWA)</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#004ba0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="U&I Logistics">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" type="image/png" href="icons/favicon.png">
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              blue: '#004ba0',
+              deep: '#003366',
+              accent: '#0066cc',
+              orange: '#f37021',
+              orangeLight: '#ff8533',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Khung chuẩn 1:1 pixel với mockup gốc (1672 x 941) trên Desktop */
+    @media (min-width: 1024px) {
+      .desktop-stage {
+        width: 1672px;
+        height: 941px;
+        max-width: 100vw;
+        max-height: 100vh;
+        aspect-ratio: 1672 / 941;
+        position: relative;
+        margin: auto;
+        overflow: hidden;
+      }
+      .pixel-card {
+        position: absolute;
+        left: 51.55%;
+        top: 7.22%;
+        width: 44.62%;
+        height: 85.33%;
+        border-radius: 36px;
+      }
+    }
+  </style>
+</head>
+<body class="h-full font-sans antialiased bg-[#004ba0] text-slate-800 flex items-center justify-center overflow-x-hidden selection:bg-brand-orange selection:text-white">
+
+  <!-- KHUNG HIỂN THỊ CHÍNH -->
+  <div class="desktop-stage w-full min-h-screen lg:min-h-0 flex flex-col justify-center relative bg-gradient-to-br from-[#0051a3] via-[#003c7a] to-[#00224b]">
+
+    <!-- Background Mockup sạch sẽ 1672x941 (Không có card bóng mờ) -->
+    <div class="absolute inset-0 z-0 pointer-events-none">
+      <img src="assets/login-bg-pristine.png" alt="U&I Logistics Portal" class="w-full h-full object-cover lg:object-fill">
+    </div>
+
+    <!-- Live Interactive HTML Form Card (Khớp 1:1 với vị trí Card trên ảnh gốc) -->
+    <div class="pixel-card relative z-10 bg-white shadow-2xl p-6 sm:p-8 lg:p-11 flex flex-col justify-between mx-4 my-8 lg:m-0 border border-slate-100/80">
+
+      <!-- Header Card: Avatar + Tiêu đề -->
+      <div class="flex flex-col items-center text-center">
+        <!-- Avatar icon tròn xanh biển -->
+        <div class="w-16 h-16 sm:w-20 sm:h-20 lg:w-[104px] lg:h-[104px] rounded-full bg-[#0066cc] flex items-center justify-center shadow-lg shadow-blue-500/20 mb-3 lg:mb-4 text-white">
+          <svg class="w-9 h-9 sm:w-11 sm:h-11 lg:w-14 lg:h-14" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl sm:text-3xl lg:text-[34px] font-extrabold text-slate-900 tracking-tight leading-tight">
+          Đăng nhập
+        </h1>
+        <p class="text-xs sm:text-sm lg:text-[15px] text-slate-500 mt-1 font-medium">
+          Cổng thông tin khách hàng U&amp;I Logistics
+        </p>
+      </div>
+
+      <!-- Form nhập liệu -->
+      <form id="loginForm" class="space-y-3.5 lg:space-y-4 my-auto" onsubmit="handleLoginSubmit(event)">
+        <!-- Input Email / Tên đăng nhập -->
+        <div>
+          <div class="relative rounded-2xl border border-slate-300 bg-white transition-all duration-200 focus-within:border-brand-accent focus-within:ring-4 focus-within:ring-blue-100">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <input 
+              type="text" 
+              id="usernameInput" 
+              required
+              placeholder="Email / Tên đăng nhập" 
+              value="abctrading@company.vn"
+              class="w-full py-3 sm:py-3.5 lg:py-4 pl-12 pr-4 text-sm sm:text-base lg:text-[17px] text-slate-900 placeholder-slate-400 bg-transparent rounded-2xl focus:outline-none"
+            >
+          </div>
+        </div>
+
+        <!-- Input Mật khẩu -->
+        <div>
+          <div class="relative rounded-2xl border border-slate-300 bg-white transition-all duration-200 focus-within:border-brand-accent focus-within:ring-4 focus-within:ring-blue-100">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+              <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <input 
+              type="password" 
+              id="passwordInput" 
+              required
+              placeholder="Mật khẩu" 
+              value="12345678"
+              class="w-full py-3 sm:py-3.5 lg:py-4 pl-12 pr-12 text-sm sm:text-base lg:text-[17px] text-slate-900 placeholder-slate-400 bg-transparent rounded-2xl focus:outline-none"
+            >
+            <!-- Nút ẩn hiện mật khẩu -->
+            <button 
+              type="button" 
+              onclick="togglePasswordVisibility()" 
+              class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none"
+              aria-label="Ẩn hiện mật khẩu"
+            >
+              <svg id="eyeIcon" class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Checkbox Ghi nhớ & Quên mật khẩu -->
+        <div class="flex items-center justify-between text-xs sm:text-sm lg:text-[15px] pt-0.5 pb-1">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" checked class="w-4 h-4 lg:w-5 lg:h-5 rounded border-slate-300 text-brand-accent focus:ring-blue-400">
+            <span class="text-slate-700 font-medium">Ghi nhớ đăng nhập</span>
+          </label>
+          <a href="#" onclick="alert('Vui lòng liên hệ Hotline 1900 636 688 để được cấp lại mật khẩu'); return false;" class="text-brand-accent hover:text-blue-800 font-semibold transition-colors">
+            Quên mật khẩu?
+          </a>
+        </div>
+
+        <!-- Nút Đăng nhập chính -->
+        <button 
+          type="submit" 
+          class="w-full py-3 sm:py-3.5 lg:py-4 px-6 rounded-2xl bg-[#0066cc] hover:bg-[#0055b3] active:scale-[0.98] text-white font-bold text-sm sm:text-base lg:text-[18px] flex items-center justify-center gap-2.5 shadow-lg shadow-blue-500/25 transition-all duration-200"
+        >
+          <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+          </svg>
+          <span>Đăng nhập</span>
+        </button>
+      </form>
+
+      <!-- Phân cách: Hoặc đăng nhập bằng -->
+      <div class="relative my-3 lg:my-4 flex items-center justify-center">
+        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+        <span class="relative bg-white px-3 text-xs lg:text-[14px] text-slate-500 font-normal">
+          Hoặc đăng nhập bằng
+        </span>
+      </div>
+
+      <!-- Nút Đăng nhập Microsoft SSO -->
+      <button 
+        type="button" 
+        onclick="handleMicrosoftLogin()"
+        class="w-full py-2.5 sm:py-3 lg:py-3.5 px-4 rounded-2xl border border-slate-300 bg-white hover:bg-slate-50 active:scale-[0.99] text-slate-800 text-xs sm:text-sm lg:text-[15px] font-semibold flex items-center justify-center gap-3 transition-colors shadow-xs"
+      >
+        <div class="grid grid-cols-2 gap-0.5 w-4 h-4 lg:w-5 lg:h-5">
+          <span class="bg-[#f25022] w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-[1px]"></span>
+          <span class="bg-[#7fba00] w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-[1px]"></span>
+          <span class="bg-[#00a4ef] w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-[1px]"></span>
+          <span class="bg-[#ffb900] w-2 h-2 lg:w-2.5 lg:h-2.5 rounded-[1px]"></span>
+        </div>
+        <span>Tài khoản Microsoft (nếu được cấp)</span>
+      </button>
+
+      <!-- Nút Cài đặt ứng dụng PWA -->
+      <div class="mt-4 lg:mt-5 pt-1">
+        <button 
+          id="installPwaBtn" 
+          type="button"
+          onclick="installPWA()"
+          class="w-full py-2.5 lg:py-3 px-4 rounded-2xl bg-[#eff6ff] hover:bg-[#dbeafe] active:scale-[0.99] border border-blue-100 flex items-center justify-center gap-2.5 transition-all group"
+        >
+          <span class="bg-[#0066cc] text-white font-extrabold text-[11px] lg:text-xs px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            PWA
+          </span>
+          <svg class="w-4 h-4 lg:w-5 lg:h-5 text-[#0066cc] group-hover:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+          </svg>
+          <span class="text-xs sm:text-sm lg:text-[14px] font-semibold text-slate-800">
+            Cài đặt ứng dụng (Thêm vào màn hình chính)
+          </span>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    function togglePasswordVisibility() {
+      const passwordInput = document.getElementById('passwordInput');
+      const eyeIcon = document.getElementById('eyeIcon');
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+        `;
+      } else {
+        passwordInput.type = 'password';
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        `;
+      }
+    }
+
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      const submitBtn = event.target.querySelector('button[type=\"submit\"]');
+      submitBtn.innerHTML = `
+        <svg class="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>Đang đăng nhập...</span>
+      `;
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    }
+
+    function handleMicrosoftLogin() {
+      alert('Đang kết nối cổng xác thực Microsoft SSO của U&I Logistics...');
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 500);
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then((reg) => console.log('SW Registered:', reg.scope))
+          .catch((err) => console.warn('SW Error:', err));
+      });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') console.log('PWA Accepted');
+          deferredPrompt = null;
+        });
+      } else {
+        alert('Ứng dụng đã sẵn sàng chạy dưới dạng PWA. Trên điện thoại, mở trình duyệt và chọn "Thêm vào màn hình chính" (Add to Home Screen).');
+      }
+    }
+  </script>
+</body>
+</html>

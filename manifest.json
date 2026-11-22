@@ -1,0 +1,48 @@
+{
+  "name": "U&I Logistics Customer Portal",
+  "short_name": "U&I Logistics",
+  "start_url": "./index.html",
+  "id": "u-and-i-logistics-portal",
+  "display": "standalone",
+  "background_color": "#004ba0",
+  "theme_color": "#004ba0",
+  "description": "Cổng thông tin khách hàng U&I Logistics - Quản lý yêu cầu vận chuyển và theo dõi tiến độ",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["business", "logistics", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Tạo yêu cầu vận chuyển",
+      "short_name": "Tạo yêu cầu",
+      "description": "Gửi yêu cầu vận chuyển, điều xe, container",
+      "url": "./dashboard.html#create-request",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Theo dõi tiến độ",
+      "short_name": "Theo dõi",
+      "description": "Xem trạng thái xử lý và vận chuyển theo thời gian thực",
+      "url": "./dashboard.html#tracking",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

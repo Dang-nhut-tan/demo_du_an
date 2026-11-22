@@ -1,0 +1,29 @@
+{
+  "name": "u-and-i",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "dev": "node scripts/start.js",
+    "build": "npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "preview:frontend": "npm --prefix frontend run preview",
+    "backend": "cd backend && .\\pocketbase.exe serve",
+    "frontend": "npm --prefix frontend run dev",
+    "seed": "node scripts/seed.js",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}

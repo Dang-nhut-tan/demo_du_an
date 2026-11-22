@@ -1,0 +1,887 @@
+<USER_REQUEST>
+MASTER PROMPT — U&I LOGISTICS CUSTOMER PORTAL
+FULL-STACK PWA + POCKETBASE + PIXEL-PERFECT MOCKUP IMPLEMENTATION
+You are a Principal Full-Stack Engineer, Senior UI/UX Engineer, PocketBase Specialist, Logistics Business Analyst, and QA Automation Engineer.
+Your mission is to build a COMPLETE, FULLY FUNCTIONAL, MOBILE-FIRST Progressive Web App for:
+U&I Logistics – Customer Portal
+This is a university demonstration project based on real export container Booking operations.
+The project must be visually faithful to the provided mockup images and fully operational with PocketBase.
+CRITICAL: The mockup images have already been downloaded and placed inside the project workspace. You MUST discover, inspect, and use these files as the primary UI design references.
+Do not redesign the application from scratch.
+Do not substitute the provided mockups with a generic dashboard template.
+Do not stop after creating static screens.
+PART 1 — NON-NEGOTIABLE REQUIREMENTS
+1.1 Pixel-Perfect UI
+Every implemented screen MUST match its corresponding reference mockup as closely as technically possible.
+Target: Pixel-perfect 1:1 at the reference viewport.
+Match:
+Overall composition
+Layout hierarchy
+Element positions
+Widths and heights
+Padding and margins
+Typography
+Font sizes and weights
+Line heights
+Text alignment
+Brand colors
+Background gradients
+Borders
+Border radius
+Shadows
+Icons
+Buttons
+Inputs
+Dropdowns
+Cards
+Header
+Navigation
+Status badges
+Section spacing
+Do not approximate visual styling when the reference can be measured.
+Use the actual reference image as the design specification.
+Do not use the mockup image itself as a page background or replace the UI with an image.
+Every UI element must be implemented using actual HTML, React components, CSS, and functional controls.
+1.2 Functional Requirements
+All major functions must work with real data.
+Required features:
+Customer login.
+Customer home dashboard.
+Create Booking request.
+Save Booking draft.
+Submit Booking.
+Schedule change request.
+Booking progress tracking.
+Customer account profile.
+Automatic form prefill.
+Dispatcher login.
+Dispatcher approval workflow.
+Dispatcher progress updates.
+Notifications.
+Booking history.
+File attachments.
+1.3 Mandatory Database
+Use PocketBase exclusively.
+No PostgreSQL, MySQL, Firebase, Supabase, or separate Express backend.
+Do not use localStorage as the business database.
+All Booking records, profiles, changes, notifications, and progress events must be persisted in PocketBase.
+PART 2 — MANDATORY MOCKUP DISCOVERY
+2.1 Inspect the Workspace First
+Before writing any UI code:
+Inspect the entire project directory.
+Find all uploaded mockup images.
+Search common folders including:
+assets/
+public/
+mockups/
+references/
+designs/
+screenshots/
+project root
+Identify PNG, JPG, JPEG, and WEBP files.
+Open and visually inspect each relevant image.
+Record image dimensions.
+Determine which application screen each image represents.
+Do not assume the filenames follow a particular naming convention.
+If an image cannot be inspected, report the problem before implementing its screen.
+2.2 Required Reference Screens
+Map the images to:
+Screen
+Reference
+Login
+Login mockup
+Home
+Mobile home dashboard mockup
+Create Booking
+Create request mockup
+Schedule Change
+Schedule change mockup
+Tracking
+Progress timeline mockup
+Account
+Customer profile and auto-fill mockup
+Also inspect the two original TMS screenshots showing the actual Booking fields.
+The original TMS screenshots are the BUSINESS FIELD REFERENCES.
+The generated mobile mockups are the VISUAL DESIGN REFERENCES.
+2.3 Design Priority
+Follow this order:
+Business requirements and original TMS fields.
+User-provided mobile mockup images.
+Consistency across the PWA.
+Responsive design conventions.
+Developer assumptions.
+If the visual mockup omits a required TMS field, preserve the visual style while adding the missing field.
+Do not silently remove required fields to achieve visual similarity.
+2.4 Create a Design Specification
+Before implementation, produce:
+docs/mockup-analysis.md
+For each image document:
+Source filename.
+Screen name.
+Reference image width and height.
+Target viewport assumptions.
+Main background colors.
+Header dimensions.
+Card layout.
+Button dimensions.
+Input dimensions.
+Typography.
+Spacing.
+Icons.
+Border radius.
+Shadows.
+Responsive behavior.
+Any unclear details.
+Create:
+docs/mockup-mapping.md
+Map each mockup to its React page and components.
+Do not begin visual implementation until this analysis is completed.
+PART 3 — TECHNOLOGY STACK
+Frontend:
+React
+TypeScript
+Vite
+Tailwind CSS
+shadcn/ui
+Lucide React
+React Router
+TanStack Query
+React Hook Form
+Zod
+PocketBase JavaScript SDK
+Backend:
+PocketBase
+PocketBase SQLite
+PocketBase authentication
+PocketBase API rules
+PocketBase realtime
+PocketBase file storage
+PocketBase migrations
+PocketBase server-side hooks for sensitive operations
+PWA:
+vite-plugin-pwa
+Web App Manifest
+Service Worker
+Installable standalone app
+Testing:
+Playwright
+TypeScript
+Screenshot comparison
+End-to-end testing against PocketBase
+All technology must be free to run locally.
+PART 4 — VISUAL IMPLEMENTATION RULES
+4.1 Branding
+Use the U&I Logistics brand visible in the mockups.
+Primary colors, subject to precise reference analysis:
+Navy: #073B82
+Blue: #1265E8
+Orange: #FF8A00
+Background: #F5F8FD
+White: #FFFFFF
+These are starting values only.
+If measured mockup colors differ, prioritize the actual mockup.
+Use the logo asset when available.
+Do not invent a new logo.
+4.2 Mobile Layout
+Primary target:
+390px CSS viewport width.
+Also support:
+360px
+375px
+393px
+430px
+Tablet
+Desktop
+Use responsive layouts rather than scaling an entire screenshot.
+The mobile UI must not have horizontal scrolling.
+4.3 Navigation
+Implement a bottom navigation matching the mobile mockup.
+Customer navigation:
+Trang chủ
+Tạo yêu cầu
+Theo dõi
+Tài khoản
+Schedule Change must be accessible from the home dashboard and Booking details.
+Maintain consistent icons, spacing, and active states.
+4.4 Typography
+Identify the closest available font to the mockup.
+Prefer Be Vietnam Pro or Inter when appropriate.
+Match:
+Heading sizes.
+Label sizes.
+Body text.
+Button text.
+Font weight.
+Line height.
+Letter spacing.
+Do not use arbitrary font sizes on every component.
+Create shared design tokens.
+4.5 Component Consistency
+Create reusable components:
+AppHeader
+BottomNavigation
+PageTitle
+PrimaryButton
+SecondaryButton
+FormInput
+FormSelect
+DateTimePicker
+StatusBadge
+BookingCard
+ContainerCard
+ProgressTimeline
+NotificationItem
+EmptyState
+LoadingState
+ConfirmationDialog
+Use the same component styling across all screens.
+PART 5 — APPLICATION SCREENS
+SCREEN 1 — LOGIN
+Follow the login mockup.
+Include:
+U&I Logistics branding.
+Customer Portal title.
+Email field.
+Password field.
+Password visibility toggle.
+Remember login.
+Forgot password.
+Login button.
+Use actual PocketBase authentication.
+Implement loading, invalid credentials, session persistence, and logout.
+After login, redirect based on role.
+SCREEN 2 — CUSTOMER HOME
+Follow the mobile dashboard mockup.
+Include:
+Branded header.
+Company greeting.
+Logistics visual banner if present in reference.
+Three main action cards.
+Booking statistics.
+Recent requests.
+Notification indicator.
+Bottom navigation.
+Main actions:
+Tạo yêu cầu vận chuyển.
+Đề xuất sửa thời gian.
+Theo dõi tiến độ.
+Statistics must be calculated from PocketBase.
+Do not hardcode counts.
+SCREEN 3 — CREATE BOOKING
+Follow the Create Request mobile mockup for visual styling.
+However, use the actual TMS fields listed below.
+A. Booking Information
+Số Booking (required).
+Khách hàng (auto-filled).
+Hãng tàu (required).
+Tên Tàu/Số chuyến.
+B. Booking Dates
+Ngày Yêu Cầu Hạ Cont Trước.
+Ngày Yêu Cầu Hạ Cont Sau.
+Ngày Giờ Cắt SI.
+Ngày Giờ Cắt Máng.
+Ngày Yêu Cầu Lấy Rỗng.
+Ngày Tàu Chạy.
+Use date and datetime inputs appropriate to each field.
+C. Locations and Cargo
+Nơi Đóng Hàng.
+Nơi Lấy Rỗng.
+Hạ bãi Thanh lý.
+Cảng Đến.
+Cảng Chuyển Tải.
+Loại Hàng Hóa.
+Use searchable dropdowns backed by PocketBase master data.
+D. Container Details
+Support:
+Container 40' cao.
+Container 40' thường.
+Container 20' thường.
+Each container entry includes:
+Container type.
+Quantity.
+Ngày YCGC.
+Add row.
+Delete row.
+Total quantity must be greater than zero before final submission.
+Do not assume the business meaning of YCGC without confirmation.
+E. Additional Information
+Ghi chú.
+File Đính Kèm.
+Use real PocketBase file uploads.
+Form Actions
+Lưu bản nháp.
+Tiếp tục.
+Quay lại.
+Gửi yêu cầu.
+Workflow:
+Enter Data → Review → Submit → Pending Confirmation.
+Use mobile-friendly vertical sections.
+No desktop-style wide tables.
+SCREEN 4 — SCHEDULE CHANGE
+Follow the schedule change mockup.
+Customer selects an existing Booking.
+Show:
+Request code.
+Booking number.
+Current status.
+Current dates.
+Container details.
+Allow proposing changes to:
+Ngày Yêu Cầu Hạ Cont Trước.
+Ngày Yêu Cầu Hạ Cont Sau.
+Ngày Giờ Cắt SI.
+Ngày Giờ Cắt Máng.
+Ngày Yêu Cầu Lấy Rỗng.
+Ngày Tàu Chạy.
+Ngày YCGC for a selected container row.
+Display:
+Original value.
+Proposed value.
+Reason.
+Optional attachment.
+Approval states:
+Chờ duyệt.
+Đã duyệt.
+Từ chối.
+The official Booking data must not change until approval.
+Record old and new values.
+Use a server-side transactional approval mechanism.
+Prevent conflicting approvals.
+SCREEN 5 — TRACKING PROGRESS
+Follow the tracking mockup.
+Search by:
+Request code.
+Booking number.
+Display a vertical timeline:
+Đã tiếp nhận yêu cầu.
+Đã xác nhận Booking.
+Đang lập kế hoạch điều xe.
+Đã bố trí phương tiện.
+Đang đóng hàng.
+Đang vận chuyển đến cảng.
+Hoàn thành.
+Each stage includes:
+Status.
+Timestamp.
+Note.
+Use PocketBase realtime subscriptions.
+Do not display fake live GPS data.
+Use real dispatcher-updated progress.
+SCREEN 6 — CUSTOMER ACCOUNT & AUTO-FILL
+Follow the customer profile mockup.
+Sections:
+Company
+Company name.
+Tax code.
+Address.
+Email.
+Phone.
+Contact
+Contact person.
+Position.
+Phone.
+Email.
+Default Booking Information
+Shipping line.
+Packing location.
+Empty pickup location.
+Clearance depot.
+Destination port.
+Transshipment port.
+Cargo type.
+Preferred container type.
+Add:
+"Tự động điền khi tạo yêu cầu"
+When enabled:
+Retrieve defaults from PocketBase.
+Prefill new Booking forms.
+Allow per-Booking overrides.
+Preserve saved defaults unless explicitly changed.
+Do not prefill dates from old Bookings.
+SCREEN 7 — DISPATCHER DASHBOARD
+Use the same visual design system.
+Create a mobile-friendly dispatcher interface.
+Features:
+Pending Bookings.
+Approved Bookings.
+Rejected Bookings.
+Schedule change proposals.
+Active transport requests.
+Dispatcher can:
+Review details.
+Approve or reject.
+Provide rejection reason.
+Update transportation stages.
+Review change history.
+Because no dispatcher mockup has been provided, derive its styling from the existing mobile mockups without inventing a different design system.
+SCREEN 8 — NOTIFICATIONS
+Create:
+Notification list.
+Unread count.
+Mark as read.
+Booking links.
+Schedule change notifications.
+Progress notifications.
+All notification data must be persisted in PocketBase.
+PART 6 — POCKETBASE DATABASE
+Create migrations for the following collections.
+users (Auth)
+name
+email
+role
+company relation
+Roles:
+CUSTOMER
+DISPATCHER
+companies
+name
+taxCode
+address
+phone
+email
+customer_profiles
+user
+company
+contactName
+position
+contactPhone
+contactEmail
+shipping_defaults
+company
+shippingLine
+packingLocation
+emptyPickupLocation
+clearanceDepot
+destinationPort
+transshipmentPort
+cargoType
+preferredContainerType
+autoFillEnabled
+Master Data
+shipping_lines
+locations
+ports
+cargo_types
+container_types
+booking_requests
+requestCode
+bookingNumber
+company
+createdBy
+shippingLine
+vesselVoyage
+requestedDropOffBefore
+requestedDropOffAfter
+siCutoff
+portCutoff
+emptyPickupDate
+vesselDepartureDate
+packingLocation
+emptyPickupLocation
+clearanceDepot
+destinationPort
+transshipmentPort
+cargoType
+notes
+status
+rejectionReason
+submittedAt
+approvedAt
+approvedBy
+booking_containers
+booking
+containerType
+quantity
+requestedYCGCDate
+booking_attachments
+booking
+file
+uploadedBy
+schedule_change_requests
+booking
+requestedBy
+status
+reason
+reviewedBy
+reviewedAt
+rejectionReason
+schedule_change_items
+scheduleChange
+targetField
+targetContainer
+oldValue
+newValue
+transport_progress
+booking
+stage
+status
+note
+updatedBy
+eventTime
+notifications
+recipient
+booking
+title
+message
+type
+isRead
+audit_logs
+actor
+action
+collectionName
+recordId
+oldData
+newData
+createdAt
+Use PocketBase relations and indexes.
+Create actual collection API rules.
+Customer data must be isolated by company.
+Sensitive approval operations must be enforced server-side.
+Do not expose PocketBase superuser credentials to the frontend.
+PART 7 — SEED DATA
+Create a repeatable seed script.
+Demo company:
+ABC Trading
+Customer login:
+[customer@demo.local](mailto:customer@demo.local)
+Dispatcher login:
+[dispatcher@demo.local](mailto:dispatcher@demo.local)
+Use documented development-only passwords.
+Seed example values:
+Hãng tàu: ONETRANS
+Nơi Đóng Hàng: Return Gold
+Nơi Lấy Rỗng: DEPOT BÌNH DƯƠNG 6
+Hạ bãi Thanh lý: DEPOT BÌNH DƯƠNG 6
+Cảng Đến: LOS ANGELES, CA
+Loại Hàng Hóa: Hàng thường
+Container types:
+40' cao
+40' thường
+20' thường
+Create sample Bookings with different statuses.
+Seed data must be stored in PocketBase.
+Running the seed script multiple times must not duplicate data.
+PART 8 — SECURITY AND DATA INTEGRITY
+Implement:
+PocketBase authentication.
+Role-based access.
+Company-level isolation.
+Backend validation.
+Secure file access.
+Unique Booking request codes.
+Audit logs.
+Duplicate submission prevention.
+Safe approval transactions.
+Error handling.
+Persistent database records.
+Never trust role, company ID, or approval permission supplied by the frontend.
+A customer must not be able to approve their own request by directly calling PocketBase APIs.
+A customer must not access another company's records.
+PART 9 — PIXEL-PERFECT VERIFICATION
+This is a mandatory phase.
+Do not skip it.
+Step 1 — Reference Screenshot
+Load the original mockup for the target screen.
+Record:
+Image dimensions.
+Main component bounds.
+Background colors.
+Text alignment.
+Card sizes.
+Input sizes.
+Button positions.
+Step 2 — Implement
+Build the screen using React and Tailwind CSS.
+Use actual UI elements.
+Do not embed the entire reference image as a substitute for UI.
+Step 3 — Capture Actual Screenshot
+Use Playwright to:
+Launch the application.
+Set the reference viewport.
+Open the corresponding route.
+Wait for fonts and UI to finish rendering.
+Capture a full-page screenshot.
+Save screenshots in:
+tests/screenshots/actual/
+Step 4 — Compare
+Compare the actual screenshot against the original mockup.
+Use image comparison tools such as pixelmatch or an equivalent image-diff library.
+Save comparison outputs in:
+tests/screenshots/diff/
+Also generate an overlay image with both screenshots aligned.
+Step 5 — Fix
+Identify visual differences:
+Incorrect header height.
+Wrong card spacing.
+Wrong font.
+Incorrect button width.
+Wrong colors.
+Misaligned icons.
+Incorrect section positions.
+Unexpected text wrapping.
+Incorrect bottom navigation.
+Missing visual elements.
+Fix the differences.
+Repeat screenshot capture and comparison.
+Step 6 — Visual Acceptance
+Target the closest practical match to the provided mockup.
+Measure and report:
+Screenshot dimensions.
+Pixel difference percentage.
+Major visual mismatches.
+Remaining limitations.
+Do not invent a visual similarity score.
+A low pixel difference alone does not guarantee correctness.
+Also inspect text, alignment, clipping, responsive behavior, and functionality.
+Important:
+Some provided mockups may contain a decorative smartphone frame or be generated images rather than exact browser screenshots.
+If so:
+Identify the actual application content area.
+Exclude decorative device framing from application layout.
+Compare equivalent content regions.
+Document crop and alignment assumptions.
+Do not force the web application to reproduce the physical phone bezel.
+If a reference screenshot includes inconsistent or impossible layout details, report the discrepancy and implement the closest usable equivalent.
+PART 10 — AUTOMATED TESTING
+Use Playwright.
+Create end-to-end tests against the real PocketBase backend.
+Required scenarios:
+Customer login.
+Invalid login.
+Customer profile update.
+Auto-fill Booking fields.
+Save Booking draft.
+Reopen draft.
+Add container row.
+Delete container row.
+Validate total container quantity.
+Upload attachment.
+Submit Booking.
+Dispatcher login.
+Dispatcher approves Booking.
+Customer submits schedule change.
+Dispatcher approves schedule change.
+Verify official dates updated.
+Verify change history.
+Dispatcher updates progress.
+Customer sees updated progress.
+Customer receives notification.
+Customer cannot access another company's Booking.
+Customer cannot approve Booking through direct API calls.
+Tests must use real PocketBase records.
+Do not mock the core workflow.
+Test desktop and mobile viewport layouts.
+Capture screenshots for visual regression testing.
+PART 11 — COMPLETE DEMO WORKFLOW
+The following live demo must work:
+CUSTOMER:
+Login
+→ Open Profile
+→ Save Default Booking Information
+→ Open Create Booking
+→ Verify Auto-fill
+→ Enter Booking Information
+→ Add Containers
+→ Upload File
+→ Save Draft
+→ Reopen Draft
+→ Submit Booking.
+DISPATCHER:
+Login
+→ View Pending Booking
+→ Open Details
+→ Approve Booking
+→ Update Progress.
+CUSTOMER:
+Login
+→ Open Booking
+→ Propose Schedule Change
+→ Submit Proposal.
+DISPATCHER:
+Login
+→ Review Original and Proposed Dates
+→ Approve Change.
+CUSTOMER:
+Login
+→ View Updated Booking
+→ View Change History
+→ Track Progress
+→ Read Notification.
+Every step must persist and retrieve actual PocketBase data.
+PART 12 — LOCAL DEVELOPMENT
+The application must run locally.
+Frontend:
+http://localhost:5173
+PocketBase:
+http://localhost:8090
+Implement project scripts for:
+Installing dependencies.
+Setting up PocketBase.
+Running migrations.
+Seeding demo data.
+Starting development environment.
+Running automated tests.
+Building production frontend.
+Previewing production build.
+Example commands:
+npm install
+npm run setup:demo
+npm run dev
+npm run test:e2e
+npm run build
+These commands must be implemented in package.json.
+If PocketBase requires a downloaded executable, document and automate the setup as much as practical.
+Do not claim that commands work unless they have been executed successfully.
+PART 13 — PWA
+Implement:
+Installable PWA.
+Manifest.
+App icons.
+Standalone mode.
+Service Worker.
+Static asset caching.
+Offline fallback.
+Responsive mobile experience.
+Do not cache sensitive PocketBase data.
+Do not claim offline Booking submission support unless it is implemented safely.
+PART 14 — IMPLEMENTATION PHASES
+PHASE 0 — WORKSPACE INSPECTION
+Inspect existing project.
+Locate all mockup files.
+Inspect TMS screenshots.
+Create mockup mapping.
+Extract design tokens.
+Identify missing information.
+PHASE 1 — FOUNDATION
+React project.
+Tailwind.
+Routing.
+PocketBase setup.
+Database migrations.
+Seed data.
+Authentication.
+PHASE 2 — PIXEL-PERFECT CUSTOMER UI
+Login.
+Home.
+Account.
+Shared components.
+Bottom navigation.
+PHASE 3 — BOOKING
+Full Booking form.
+Auto-fill.
+Container rows.
+Attachments.
+Draft saving.
+Submission.
+PHASE 4 — DISPATCHER
+Dispatcher dashboard.
+Booking review.
+Approval and rejection.
+PHASE 5 — SCHEDULE CHANGES
+Customer change request.
+Dispatcher review.
+Approval.
+Rejection.
+Audit history.
+PHASE 6 — TRACKING
+Progress timeline.
+Dispatcher updates.
+Notifications.
+Realtime updates.
+PHASE 7 — PWA AND TESTING
+Manifest.
+Service Worker.
+Mobile responsive testing.
+End-to-end tests.
+PHASE 8 — VISUAL REGRESSION
+For every screen:
+Reference Image
+→ Implemented UI
+→ Screenshot
+→ Visual Diff
+→ Fix
+→ Recheck.
+Repeat until the remaining differences are understood and acceptable.
+PART 15 — DEFINITION OF DONE
+The project is complete only when:
+FUNCTIONAL:
+Login works.
+Customer profile works.
+Auto-fill works.
+Booking creation works.
+Draft saving works.
+Container management works.
+File upload works.
+Dispatcher approval works.
+Schedule change works.
+Tracking works.
+Notifications work.
+Data persists after reload.
+PocketBase permissions work.
+VISUAL:
+All provided mockups have been inspected.
+Each mockup has a corresponding implemented screen.
+UI matches the reference at the target viewport.
+Screenshots have been captured.
+Visual differences have been reviewed.
+No major missing elements remain.
+No horizontal overflow on mobile.
+Text and buttons are not clipped.
+Responsive behavior works.
+TECHNICAL:
+PocketBase starts.
+Migrations work.
+Seed data works.
+TypeScript compiles.
+Production build succeeds.
+Critical end-to-end tests pass.
+README contains accurate startup instructions.
+Never claim completion without verification.
+PART 16 — FINAL OUTPUT
+When finished, provide:
+Project structure.
+Startup instructions.
+PocketBase configuration.
+Demo credentials.
+Implemented features.
+Automated test results.
+Screenshot comparison results.
+Remaining visual differences.
+Known limitations.
+Live demo walkthrough.
+Include a visual comparison report for each mockup.
+FINAL EXECUTION INSTRUCTION
+Do not respond with only a plan or explanation. Implement the application.
+First, inspect the workspace and locate the uploaded mockup images.
+Second, analyze each image and map it to the required screen.
+Third, inspect the original TMS screenshots and preserve all relevant Booking fields.
+Fourth, initialize PocketBase and create the database schema.
+Fifth, implement the complete React PWA.
+Sixth, connect every business function to PocketBase.
+Seventh, run the end-to-end workflow.
+Eighth, capture screenshots and compare them with the original mockups.
+Ninth, fix visual and functional defects.
+Finally, provide verified startup instructions and test results.
+Priority order:
+Correct business workflow.
+Real PocketBase persistence.
+Pixel-perfect mockup fidelity.
+Mobile usability.
+End-to-end reliability.
+Maintainable architecture.
+The expected result is a COMPLETE, RUNNABLE, FULL-STACK, MOBILE-FIRST U&I LOGISTICS PWA DEMO that closely reproduces the supplied mockup images while supporting real Booking operations through PocketBase.
+Do not substitute the required implementation with static pages, mock APIs, hardcoded records, or unverified claims of completion. /swarm 
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-11-22T21:48:38+07:00.
+
+The user's current state is as follows:
+Active Document: c:\Users\TAN\Documents\Desktop\U and I\login.html (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 1
+
+The user has mentioned some items in the form @[ITEM]. Here is extra information about the items that were mentioned by the user, in the order that they appear:
+
+/swarm is a [Slash Command]:
+<SKILL>The user requested you read and use the "swarm" skill. The path to the skill file is:
+C:\Users\TAN\.gemini\antigravity\builtin\skills\native_swarm\SKILL.md</SKILL>
+</ADDITIONAL_METADATA>
