@@ -190,11 +190,11 @@ export const subscribeToTrackingUpdates = (
   onUpdate: (data: any) => void
 ) => {
   try {
-    pb.collection('transport_progress').subscribe('*', (e) => {
+    pb.collection('transport_progress').subscribe('*', (e: any) => {
       onUpdate(e.record);
     });
 
-    pb.collection('booking_requests').subscribe('*', (e) => {
+    pb.collection('booking_requests').subscribe('*', (e: any) => {
       onUpdate(e.record);
     });
 

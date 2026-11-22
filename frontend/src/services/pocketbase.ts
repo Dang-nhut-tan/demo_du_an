@@ -237,9 +237,9 @@ export const fetchDashboardStats = async () => {
     });
     const items = result.items;
     const total = items.length;
-    const inProgress = items.filter(i => i.status === 'IN_PROGRESS' || i.status === 'APPROVED').length;
-    const pending = items.filter(i => i.status === 'PENDING').length;
-    const changeRequests = items.filter(i => i.has_change_request || i.status === 'CHANGE_REQUESTED').length;
+    const inProgress = items.filter((i: any) => i.status === 'IN_PROGRESS' || i.status === 'APPROVED').length;
+    const pending = items.filter((i: any) => i.status === 'PENDING').length;
+    const changeRequests = items.filter((i: any) => i.has_change_request || i.status === 'CHANGE_REQUESTED').length;
 
     return {
       total: total || 12,
@@ -267,7 +267,7 @@ export const fetchRecentBookings = async (limit: number = 5): Promise<BookingReq
     });
     if (records.items.length === 0) return MOCK_BOOKINGS;
 
-    return records.items.map(r => ({
+    return records.items.map((r: any) => ({
       id: r.id,
       bookingNumber: r.bookingNumber || r.booking_number || r.id,
       code: r.requestCode || r.bookingNumber || r.code || `REQ-${r.id.substring(0, 8).toUpperCase()}`,

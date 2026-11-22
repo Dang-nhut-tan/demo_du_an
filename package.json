@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "",
   "main": "sw.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "workspaces": [
+    "frontend"
+  ],
   "scripts": {
     "start": "node scripts/start.js",
     "dev": "node scripts/start.js",
-    "build": "npm --prefix frontend run build",
-    "build:frontend": "npm --prefix frontend run build",
+    "postinstall": "npm --prefix frontend install",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
     "preview:frontend": "npm --prefix frontend run preview",
     "backend": "cd backend && .\\pocketbase.exe serve",
     "frontend": "npm --prefix frontend run dev",
@@ -22,7 +23,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "devDependencies": {
     "@playwright/test": "^1.65.1"
   }
