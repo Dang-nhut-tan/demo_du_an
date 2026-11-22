@@ -65,6 +65,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems = [
     { to: '/admin', label: 'Bảng điều khiển', icon: LayoutDashboard, end: true },
+    { to: '/admin/registrations', label: 'Duyệt đăng ký', icon: UserCheck },
     { to: '/admin/master-data', label: 'Danh mục Master Data', icon: Database },
     { to: '/admin/customers', label: 'Quản lý Khách hàng', icon: Users },
     { to: '/admin/form-config', label: 'Cấu hình Form TMS', icon: Sliders },

@@ -14,13 +14,16 @@ import { AdminDashboardPage } from './features/admin/AdminDashboardPage';
 import { MasterDataPage } from './features/admin/MasterDataPage';
 import { CustomerManagementPage } from './features/admin/CustomerManagementPage';
 import { FormConfigPage } from './features/admin/FormConfigPage';
+import { RegisterPage } from './features/auth/RegisterPage';
+import { RegistrationsPage } from './features/admin/RegistrationsPage';
 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Full-width Screen 1: Login */}
+        {/* Full-width Screen 1: Login & Registration */}
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         {/* Core Mobile / Responsive Screens wrapped in MobileContainer */}
         <Route
@@ -103,6 +106,7 @@ export const App: React.FC = () => {
         {/* Enterprise Admin Portal */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboardPage />} />
+          <Route path="registrations" element={<RegistrationsPage />} />
           <Route path="master-data" element={<MasterDataPage />} />
           <Route path="customers" element={<CustomerManagementPage />} />
           <Route path="form-config" element={<FormConfigPage />} />

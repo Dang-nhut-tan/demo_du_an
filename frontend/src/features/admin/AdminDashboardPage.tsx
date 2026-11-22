@@ -10,6 +10,7 @@ import {
   Sliders,
   History,
   TrendingUp,
+  UserCheck,
 } from 'lucide-react';
 import { fetchAdminDashboardMetrics, fetchRecentAuditLogs } from './adminApi';
 import { AuditLog } from '../../types';
@@ -143,7 +144,27 @@ export const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Quick Action Hub */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div
+          onClick={() => navigate('/admin/registrations')}
+          className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:border-[#004ba0] hover:shadow-md transition-all cursor-pointer group flex items-start gap-4"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+            <UserCheck size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-emerald-600">
+                Duyệt đăng ký mới
+              </h3>
+              <ArrowRight size={16} className="text-slate-400 group-hover:translate-x-1 group-hover:text-emerald-600 transition-all" />
+            </div>
+            <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+              Kiểm duyệt hồ sơ đăng ký tài khoản khách hàng, phê duyệt gán công ty hoặc từ chối.
+            </p>
+          </div>
+        </div>
+
         <div
           onClick={() => navigate('/admin/master-data')}
           className="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm hover:border-[#004ba0] hover:shadow-md transition-all cursor-pointer group flex items-start gap-4"
