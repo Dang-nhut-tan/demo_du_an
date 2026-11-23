@@ -571,13 +571,13 @@ export const fetchCustomerAccounts = async (): Promise<{ companies: Company[]; a
     if (compRecords && compRecords.length > 0) {
       companiesList = compRecords.map((c) => ({
         id: c.id,
-        name: c.name,
-        taxCode: c.taxId || c.tax_code || '0312345678',
+        name: c.name || 'Công ty khách hàng',
+        taxCode: c.taxId || c.tax_code || c.taxCode || '0312345678',
         code: c.code || 'UIL-KH-9921',
         email: c.email || 'contact@abctrading.vn',
         phone: c.phone || '0274 3738 888',
         address: c.address || '',
-        verified: c.status === 'active' || true,
+        verified: c.status === 'active' || Boolean(c.verified),
       }));
       saveStoredCompanies(companiesList);
     } else {
@@ -596,13 +596,13 @@ export const fetchCustomerAccounts = async (): Promise<{ companies: Company[]; a
     if (userRecords && userRecords.length > 0) {
       accountsList = userRecords.map((u) => ({
         id: u.id,
-        name: u.name || u.email.split('@')[0],
-        email: u.email,
+        name: u.name || (u.email ? u.email.split('@')[0] : 'Khách hàng'),
+        email: u.email || 'customer@demo.local',
         companyName: u.expand?.company?.name || u.company_name || 'Công ty ABC Trading',
         companyCode: u.expand?.company?.code || 'UIL-KH-9921',
         role: u.role || 'customer',
         isActive: u.verified !== false && u.status !== 'inactive',
-        created: u.created,
+        created: u.created || new Date().toISOString(),
       }));
       saveStoredAccounts(accountsList);
     } else {

@@ -196,17 +196,29 @@ export const CustomerManagementPage: React.FC = () => {
     }
   };
 
-  const filteredCompanies = companies.filter((c) =>
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.taxCode.includes(searchQuery)
-  );
+  const cleanQuery = (searchQuery || '').trim().toLowerCase();
 
-  const filteredAccounts = accounts.filter((a) =>
-    a.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.companyName.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCompanies = (companies || []).filter((c) => {
+    if (!c) return false;
+    const name = (c.name || '').toLowerCase();
+    const code = (c.code || '').toLowerCase();
+    const taxCode = (c.taxCode || '').toLowerCase();
+    return name.includes(cleanQuery) || code.includes(cleanQuery) || taxCode.includes(cleanQuery);
+  });
+
+  const filteredAccounts = (accounts || []).filter((a) => {
+    if (!a) return false;
+    const email = (a.email || '').toLowerCase();
+    const name = (a.name || '').toLowerCase();
+    const companyName = (a.companyName || '').toLowerCase();
+    const companyCode = (a.companyCode || '').toLowerCase();
+    return (
+      email.includes(cleanQuery) ||
+      name.includes(cleanQuery) ||
+      companyName.includes(cleanQuery) ||
+      companyCode.includes(cleanQuery)
+    );
+  });
 
   return (
     <div className="space-y-5 max-w-7xl mx-auto">

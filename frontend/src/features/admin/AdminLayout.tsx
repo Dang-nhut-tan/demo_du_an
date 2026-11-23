@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { isAdminUser } from './adminApi';
 import { pb } from '../../services/pocketbase';
+import { ErrorBoundary } from '../../components/common/ErrorBoundary';
 
 export const AdminLayout: React.FC = () => {
   const navigate = useNavigate();
@@ -303,7 +304,9 @@ export const AdminLayout: React.FC = () => {
               </div>
             </div>
           ) : (
-            <Outlet />
+            <ErrorBoundary fallbackTitle="Lỗi hiển thị nội dung quản trị">
+              <Outlet />
+            </ErrorBoundary>
           )}
         </main>
       </div>
