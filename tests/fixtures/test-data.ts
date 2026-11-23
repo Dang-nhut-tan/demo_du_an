@@ -1,3 +1,5 @@
+export const PB_URL = process.env.PB_URL || (process.env.TEST_ENV === 'local' ? 'http://127.0.0.1:8090' : 'https://demo-du-an-1.onrender.com');
+
 export const TEST_USERS = {
   customer: {
     email: 'customer@demo.local',

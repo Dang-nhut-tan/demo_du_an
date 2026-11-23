@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { TEST_USERS } from '../fixtures/test-data';
-
-const PB_URL = 'http://127.0.0.1:8090';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
 test.describe('Suite 13: Admin <-> Customer <-> Dispatcher End-to-End Data Synchronization', () => {
   const timestamp = Date.now().toString().slice(-4);

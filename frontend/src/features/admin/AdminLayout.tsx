@@ -207,7 +207,7 @@ export const AdminLayout: React.FC = () => {
               <span>PocketBase</span>
               <span className="font-semibold text-emerald-600 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                Port 8090 Live
+                Cloud Live
               </span>
             </div>
           </div>

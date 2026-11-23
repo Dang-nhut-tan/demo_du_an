@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { BookingPage } from '../pages/BookingPage';
-import { TEST_USERS } from '../fixtures/test-data';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
 test.describe('Suite 4: Create Booking Request Full Lifecycle Suite', () => {
   let bookingPage: BookingPage;
@@ -123,7 +123,7 @@ test.describe('Suite 4: Create Booking Request Full Lifecycle Suite', () => {
       await expect(page.locator('text=test_booking_doc.pdf').first()).toBeVisible({ timeout: 5000 });
     } else {
       // Direct API test verifying booking_attachments storage
-      const res = await fetch('http://127.0.0.1:8090/api/collections/booking_attachments/records?perPage=1');
+      const res = await fetch(`${PB_URL}/api/collections/booking_attachments/records?perPage=1`);
       expect([200, 403]).toContain(res.status);
     }
   });

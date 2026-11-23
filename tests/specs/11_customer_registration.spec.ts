@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { TEST_USERS } from '../fixtures/test-data';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
-const POCKETBASE_URL = 'http://127.0.0.1:8090';
+const POCKETBASE_URL = PB_URL;
 
 test.describe('Suite 11: Customer Registration & Admin Approval Flow', () => {
   const timestamp = Date.now().toString().slice(-6);

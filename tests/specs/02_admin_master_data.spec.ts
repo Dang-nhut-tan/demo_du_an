@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
 import { AdminPage } from '../pages/AdminPage';
 import { BookingPage } from '../pages/BookingPage';
-import { TEST_USERS } from '../fixtures/test-data';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
 test.describe('Suite 2: Admin Master Data & Dynamic Combobox Suite', () => {
   let adminToken: string = '';
@@ -10,7 +10,7 @@ test.describe('Suite 2: Admin Master Data & Dynamic Combobox Suite', () => {
 
   test.beforeAll(async () => {
     try {
-      const adminRes = await fetch('http://127.0.0.1:8090/api/admins/auth-with-password', {
+      const adminRes = await fetch(`${PB_URL}/api/admins/auth-with-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identity: TEST_USERS.admin.email, password: TEST_USERS.admin.password }),
@@ -139,14 +139,14 @@ test.describe('Suite 2: Admin Master Data & Dynamic Combobox Suite', () => {
 
     const dupCode = `DUP_CODE_${Date.now()}`;
     // First insert
-    await fetch('http://127.0.0.1:8090/api/collections/shipping_lines/records', {
+    await fetch(`${PB_URL}/api/collections/shipping_lines/records`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: adminToken },
       body: JSON.stringify({ code: dupCode, name: 'First Record', isActive: true }),
     });
 
     // Second insert with same code
-    const res2 = await fetch('http://127.0.0.1:8090/api/collections/shipping_lines/records', {
+    const res2 = await fetch(`${PB_URL}/api/collections/shipping_lines/records`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: adminToken },
       body: JSON.stringify({ code: dupCode, name: 'Duplicate Record', isActive: true }),

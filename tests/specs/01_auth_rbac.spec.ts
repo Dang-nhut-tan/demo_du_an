@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { LoginPage } from '../pages/LoginPage';
-import { TEST_USERS } from '../fixtures/test-data';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
 test.describe('Suite 1: Authentication & Role-Based Access Control', () => {
   let loginPage: LoginPage;
@@ -26,13 +26,13 @@ test.describe('Suite 1: Authentication & Role-Based Access Control', () => {
 
   test('TC-LOGIN-003: Role permissions Customer vs Dispatcher vs Admin via UI & API', async ({ page }) => {
     // 1. Customer cannot write to master data API (API Rule 403/400)
-    const custAuthRes = await fetch('http://127.0.0.1:8090/api/collections/users/auth-with-password', {
+    const custAuthRes = await fetch(`${PB_URL}/api/collections/users/auth-with-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ identity: TEST_USERS.customer.email, password: TEST_USERS.customer.password }),
     });
     const custAuth = await custAuthRes.json();
-    const custWriteRes = await fetch('http://127.0.0.1:8090/api/collections/shipping_lines/records', {
+    const custWriteRes = await fetch(`${PB_URL}/api/collections/shipping_lines/records`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: custAuth.token },
       body: JSON.stringify({ code: 'HACK_LINE', name: 'Unauthorized Line', isActive: true }),

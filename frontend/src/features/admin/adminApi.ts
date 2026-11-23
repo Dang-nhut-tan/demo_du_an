@@ -828,12 +828,11 @@ export const fetchAdminDashboardMetrics = async () => {
       pb.collection('booking_requests').getList(1, 100, { filter: 'status = "PENDING"' }),
     ]);
 
-    // Count all active master data across categories
-    let activeMasterDataCount = 0;
-    for (const cat of MASTER_DATA_CATEGORIES) {
-      const items = await fetchMasterDataItems(cat.key, 'active');
-      activeMasterDataCount += items.length;
-    }
+    // Count all active master data across categories in parallel
+    const allCatItems = await Promise.all(
+      MASTER_DATA_CATEGORIES.map((cat) => fetchMasterDataItems(cat.key, 'active').catch(() => []))
+    );
+    const activeMasterDataCount = allCatItems.reduce((acc, items) => acc + items.length, 0);
 
     return {
       totalCustomers: companiesRes.totalItems || 2,

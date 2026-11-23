@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { TEST_USERS } from '../fixtures/test-data';
+import { TEST_USERS, PB_URL } from '../fixtures/test-data';
 
 test.describe('Suite 8: Database & Backend Direct Verification Suite', () => {
   let adminToken: string = '';
 
   test.beforeAll(async () => {
     try {
-      const adminRes = await fetch('http://127.0.0.1:8090/api/admins/auth-with-password', {
+      const adminRes = await fetch(`${PB_URL}/api/admins/auth-with-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ identity: TEST_USERS.admin.email, password: TEST_USERS.admin.password }),
@@ -37,7 +37,7 @@ test.describe('Suite 8: Database & Backend Direct Verification Suite', () => {
     ];
 
     for (const coll of collections) {
-      const res = await fetch(`http://127.0.0.1:8090/api/collections/${coll}/records?perPage=5`, {
+      const res = await fetch(`${PB_URL}/api/collections/${coll}/records?perPage=5`, {
         headers,
       });
 

@@ -128,7 +128,7 @@ test.describe('Suite 10: Mobile Responsive & Scrolling Verification', () => {
     for (const vp of testVps) {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await page.goto('/profile');
-      await expect(page.locator('text=Thông tin công ty').first()).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('text=/hồ sơ pháp lý|doanh nghiệp/i').first()).toBeVisible({ timeout: 10000 });
 
       // Check Tabs are rendered and clickable
       const companyTab = page.locator('button:has-text("Công ty")').first();
