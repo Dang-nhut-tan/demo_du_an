@@ -18,6 +18,7 @@ import {
   Compass,
   Package,
   Layers,
+  Trash2,
 } from 'lucide-react';
 import {
   MASTER_DATA_CATEGORIES,
@@ -25,6 +26,7 @@ import {
   createMasterDataItem,
   updateMasterDataItem,
   toggleMasterDataActive,
+  deleteMasterDataItem,
 } from './adminApi';
 import { MasterDataCategoryKey, MasterDataItem } from '../../types';
 
@@ -74,6 +76,24 @@ export const MasterDataPage: React.FC = () => {
     loadItems();
   }, [selectedCategory, statusFilter, searchQuery]);
 
+  const generateCodeFromName = (val: string): string => {
+    return val
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+      .slice(0, 15);
+  };
+
+  const handleNameChange = (val: string) => {
+    setFormName(val);
+    if (!editingItem && (!formCode || formCode === generateCodeFromName(formName))) {
+      setFormCode(generateCodeFromName(val));
+    }
+  };
+
   const openAddModal = () => {
     setEditingItem(null);
     setFormCode('');
@@ -98,8 +118,11 @@ export const MasterDataPage: React.FC = () => {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formCode.trim() || !formName.trim()) {
-      setErrorMessage('Mã danh mục và Tên danh mục là bắt buộc!');
+    const finalName = formName.trim() || formCode.trim();
+    const finalCode = (formCode.trim() || generateCodeFromName(finalName) || `ITEM_${Date.now().toString().slice(-4)}`).toUpperCase();
+
+    if (!finalName && !finalCode) {
+      setErrorMessage('Vui lòng nhập tên hoặc mã danh mục!');
       return;
     }
 
@@ -110,23 +133,23 @@ export const MasterDataPage: React.FC = () => {
       if (editingItem) {
         // Update existing record
         await updateMasterDataItem(selectedCategory, editingItem.id, {
-          code: formCode.trim().toUpperCase(),
-          name: formName.trim(),
+          code: finalCode,
+          name: finalName,
           description: formDescription.trim(),
-          sortOrder: Number(formSortOrder) || 10,
+          sortOrder: Number(formSortOrder) || items.length + 1,
           isActive: formIsActive,
         });
-        setSuccessMessage(`Đã cập nhật bản ghi "${formName.trim()}" thành công!`);
+        setSuccessMessage(`Đã cập nhật bản ghi "${finalName}" thành công!`);
       } else {
         // Create new record
         await createMasterDataItem(selectedCategory, {
-          code: formCode.trim().toUpperCase(),
-          name: formName.trim(),
+          code: finalCode,
+          name: finalName,
           description: formDescription.trim(),
-          sortOrder: Number(formSortOrder) || 10,
+          sortOrder: Number(formSortOrder) || items.length + 1,
           isActive: formIsActive,
         });
-        setSuccessMessage(`Đã thêm mới bản ghi "${formName.trim()}" vào danh mục thành công!`);
+        setSuccessMessage(`Đã thêm mới bản ghi "${finalName}" vào danh mục thành công!`);
       }
       setModalOpen(false);
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -135,6 +158,21 @@ export const MasterDataPage: React.FC = () => {
       setErrorMessage(err.message || 'Lỗi khi lưu dữ liệu');
     } finally {
       setFormSubmitting(false);
+    }
+  };
+
+  const handleDeleteItem = async (item: MasterDataItem) => {
+    const title = item.name || item.code || 'bản ghi này';
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa bản ghi "${title}" khỏi danh mục không?`)) {
+      return;
+    }
+    try {
+      await deleteMasterDataItem(selectedCategory, item.id);
+      setSuccessMessage(`Đã xóa bản ghi "${title}" thành công!`);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      await loadItems();
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Lỗi khi xóa bản ghi');
     }
   };
 
@@ -363,6 +401,13 @@ export const MasterDataPage: React.FC = () => {
                         >
                           <Power size={15} />
                         </button>
+                        <button
+                          onClick={() => handleDeleteItem(item)}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                          title="Xóa bản ghi"
+                        >
+                          <Trash2 size={15} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -407,18 +452,17 @@ export const MasterDataPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Mã code <span className="text-[#f37021]">*</span>
+                    Mã code
                   </label>
                   <input
                     type="text"
                     name="code"
-                    required
-                    placeholder="VD: HMM, WH-BD"
+                    placeholder="VD: HMM (tự sinh nếu để trống)"
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value)}
                     className="w-full py-2 px-3 text-xs text-slate-800 bg-white rounded-xl border border-slate-200 focus:border-[#004ba0] focus:ring-1 focus:ring-[#004ba0] uppercase font-mono font-bold outline-none"
                   />
-                  <p className="text-[10px] text-slate-400 mt-1">Duy nhất &amp; viết hoa</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Duy nhất &amp; viết hoa (tự sinh nếu để trống)</p>
                 </div>
 
                 <div>
@@ -446,7 +490,7 @@ export const MasterDataPage: React.FC = () => {
                   required
                   placeholder="VD: Hyundai Merchant Marine, Kho U&I Bình Dương..."
                   value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
+                  onChange={(e) => handleNameChange(e.target.value)}
                   className="w-full py-2.5 px-3 text-xs text-slate-800 bg-white rounded-xl border border-slate-200 focus:border-[#004ba0] focus:ring-1 focus:ring-[#004ba0] outline-none font-semibold"
                 />
               </div>

@@ -148,7 +148,13 @@ export const getStoredMasterData = (): Record<MasterDataCategoryKey, MasterDataI
     const raw = typeof window !== 'undefined' ? localStorage.getItem(MASTER_DATA_STORAGE_KEY) : null;
     if (raw) {
       const parsed = JSON.parse(raw);
-      return { ...FALLBACK_MASTER_DATA, ...parsed };
+      const cleaned: any = { ...FALLBACK_MASTER_DATA };
+      for (const k of Object.keys(FALLBACK_MASTER_DATA) as MasterDataCategoryKey[]) {
+        const list = parsed[k] && Array.isArray(parsed[k]) ? parsed[k] : FALLBACK_MASTER_DATA[k];
+        // Clean out any corrupt/empty records where both name and code are missing/blank
+        cleaned[k] = list.filter((item: any) => item && (item.name?.trim() || item.code?.trim()));
+      }
+      return cleaned;
     }
   } catch (_e) {}
   return { ...FALLBACK_MASTER_DATA };
@@ -316,7 +322,7 @@ export const fetchMasterDataItems = async (
 
   // Filter stored resilient cache
   const stored = getStoredMasterData();
-  let items = stored[categoryKey] || [];
+  let items = (stored[categoryKey] || []).filter((i) => i && (i.name?.trim() || i.code?.trim()));
   if (statusFilter === 'active') {
     items = items.filter((i) => i.isActive);
   } else if (statusFilter === 'inactive') {
@@ -339,9 +345,14 @@ export const createMasterDataItem = async (
   const meta = MASTER_DATA_CATEGORIES.find((c) => c.key === categoryKey);
   if (!meta) throw new Error('Danh mục không hợp lệ');
 
+  const rawName = (data.name || '').trim();
+  const rawCode = (data.code || '').trim().toUpperCase();
+  const finalCode = rawCode || rawName.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9_-]/g, '_').slice(0, 15) || `ITEM_${Date.now().toString().slice(-4)}`;
+  const finalName = rawName || rawCode || 'Bản ghi mới';
+
   const recordPayload = {
-    code: data.code.trim().toUpperCase(),
-    name: data.name.trim(),
+    code: finalCode,
+    name: finalName,
     description: data.description?.trim() || '',
     isActive: data.isActive ?? true,
     sortOrder: data.sortOrder ?? 10,
@@ -354,14 +365,14 @@ export const createMasterDataItem = async (
     item = {
       id: created.id,
       collectionName: meta.collection,
-      code: created.code,
-      name: created.name,
-      description: created.description || '',
-      isActive: created.isActive ?? true,
-      sortOrder: created.sortOrder ?? 10,
-      type: created.type,
-      created: created.created,
-      updated: created.updated,
+      code: created.code || recordPayload.code,
+      name: created.name || recordPayload.name,
+      description: created.description || recordPayload.description || '',
+      isActive: created.isActive ?? recordPayload.isActive ?? true,
+      sortOrder: created.sortOrder ?? recordPayload.sortOrder ?? 10,
+      type: created.type || meta.typeFilter,
+      created: created.created || new Date().toISOString(),
+      updated: created.updated || new Date().toISOString(),
     };
   } catch (_err: any) {
     // If offline or rule blocked, generate persistent local item
@@ -381,7 +392,7 @@ export const createMasterDataItem = async (
 
   // Persist to local storage so F5/reloads NEVER lose newly added items
   const stored = getStoredMasterData();
-  stored[categoryKey] = [item, ...(stored[categoryKey] || []).filter((i) => i.id !== item.id)];
+  stored[categoryKey] = [item, ...(stored[categoryKey] || []).filter((i) => i.id !== item.id && (i.name?.trim() || i.code?.trim()))];
   saveStoredMasterData(stored);
   return item;
 };
@@ -431,6 +442,27 @@ export const updateMasterDataItem = async (
   stored[categoryKey] = (stored[categoryKey] || []).map((i) => (i.id === id ? { ...i, ...item } : i));
   saveStoredMasterData(stored);
   return item;
+};
+
+// Master Data: Delete record
+export const deleteMasterDataItem = async (
+  categoryKey: MasterDataCategoryKey,
+  id: string
+): Promise<boolean> => {
+  const meta = MASTER_DATA_CATEGORIES.find((c) => c.key === categoryKey);
+  if (meta) {
+    try {
+      await pb.collection(meta.collection).delete(id);
+    } catch (_err) {
+      // ignore
+    }
+  }
+
+  // Remove from persistent local storage
+  const stored = getStoredMasterData();
+  stored[categoryKey] = (stored[categoryKey] || []).filter((i) => i.id !== id);
+  saveStoredMasterData(stored);
+  return true;
 };
 
 // Master Data: Soft Toggle Active Status (NEVER HARD DELETE)
