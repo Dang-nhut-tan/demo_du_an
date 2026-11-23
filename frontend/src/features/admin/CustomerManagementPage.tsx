@@ -15,7 +15,15 @@ import {
   Power,
   Edit2,
 } from 'lucide-react';
-import { fetchCustomerAccounts, updateCompany, CustomerAccountRow } from './adminApi';
+import {
+  fetchCustomerAccounts,
+  updateCompany,
+  createCompany,
+  createCustomerAccount,
+  CustomerAccountRow,
+  getStoredAccounts,
+  saveStoredAccounts,
+} from './adminApi';
 import { Company } from '../../types';
 import { pb } from '../../services/pocketbase';
 
@@ -123,11 +131,7 @@ export const CustomerManagementPage: React.FC = () => {
         status: 'active',
       };
 
-      try {
-        await pb.collection('companies').create(payload);
-      } catch (_err) {
-        // Local simulation
-      }
+      await createCompany(payload);
 
       setSuccessMessage(`Đã thêm công ty khách hàng "${payload.name}" thành công!`);
       setAddCompanyModal(false);
@@ -158,11 +162,7 @@ export const CustomerManagementPage: React.FC = () => {
         company_name: comp?.name,
       };
 
-      try {
-        await pb.collection('users').create(payload);
-      } catch (_err) {
-        // Local fallback
-      }
+      await createCustomerAccount(payload);
 
       setSuccessMessage(`Đã tạo tài khoản khách hàng "${payload.email}" thành công!`);
       setAddAccountModal(false);
@@ -186,7 +186,9 @@ export const CustomerManagementPage: React.FC = () => {
       } catch (_e) {
         // fallback
       }
-      setAccounts(accounts.map((a) => (a.id === account.id ? { ...a, isActive: nextState } : a)));
+      const updatedAccounts = accounts.map((a) => (a.id === account.id ? { ...a, isActive: nextState } : a));
+      setAccounts(updatedAccounts);
+      saveStoredAccounts(updatedAccounts);
       setSuccessMessage(`Đã ${nextState ? 'kích hoạt' : 'khóa tạm thời'} tài khoản "${account.email}"`);
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {

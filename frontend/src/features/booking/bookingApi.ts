@@ -336,6 +336,20 @@ const mapToComboboxOptions = (records: any[], fallback: ComboboxOption[]): Combo
   return options.length > 0 ? options : fallback;
 };
 
+// Helper to read stored master data in offline/staging fallback
+const getStoredMasterOptions = (key: string, fallback: ComboboxOption[]): ComboboxOption[] => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem('u_and_i_admin_master_data') : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed[key] && Array.isArray(parsed[key]) && parsed[key].length > 0) {
+        return mapToComboboxOptions(parsed[key], fallback);
+      }
+    }
+  } catch (_e) {}
+  return fallback;
+};
+
 // Fetch master data from PocketBase filtering for 'isActive = true' sorted by sortOrder asc, name asc
 export const fetchMasterData = async (): Promise<MasterData> => {
   try {
@@ -363,29 +377,29 @@ export const fetchMasterData = async (): Promise<MasterData> => {
     ]);
 
     const shippingLines =
-      linesRes.status === 'fulfilled'
+      linesRes.status === 'fulfilled' && linesRes.value.length > 0
         ? mapToComboboxOptions(linesRes.value, [])
-        : FALLBACK_MASTER_DATA.shippingLines;
+        : getStoredMasterOptions('shipping_lines', FALLBACK_MASTER_DATA.shippingLines);
 
     const locations =
-      locsRes.status === 'fulfilled'
+      locsRes.status === 'fulfilled' && locsRes.value.length > 0
         ? mapToComboboxOptions(locsRes.value, [])
-        : FALLBACK_MASTER_DATA.locations;
+        : getStoredMasterOptions('packing_locations', FALLBACK_MASTER_DATA.locations);
 
     const ports =
-      portsRes.status === 'fulfilled'
+      portsRes.status === 'fulfilled' && portsRes.value.length > 0
         ? mapToComboboxOptions(portsRes.value, [])
-        : FALLBACK_MASTER_DATA.ports;
+        : getStoredMasterOptions('destination_ports', FALLBACK_MASTER_DATA.ports);
 
     const cargoTypes =
-      cargoRes.status === 'fulfilled'
+      cargoRes.status === 'fulfilled' && cargoRes.value.length > 0
         ? mapToComboboxOptions(cargoRes.value, [])
-        : FALLBACK_MASTER_DATA.cargoTypes;
+        : getStoredMasterOptions('cargo_types', FALLBACK_MASTER_DATA.cargoTypes);
 
     const containerTypes =
-      typesRes.status === 'fulfilled'
+      typesRes.status === 'fulfilled' && typesRes.value.length > 0
         ? mapToComboboxOptions(typesRes.value, [])
-        : FALLBACK_MASTER_DATA.containerTypes;
+        : getStoredMasterOptions('container_types', FALLBACK_MASTER_DATA.containerTypes);
 
     return {
       shippingLines,

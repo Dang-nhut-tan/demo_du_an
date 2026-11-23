@@ -136,9 +136,121 @@ export const DEFAULT_FORM_CONFIGS: FormFieldConfig[] = [
   { id: 'fc-10', fieldKey: 'notes', label: 'Ghi chú đặc biệt', placeholder: 'Nhập ghi chú yêu cầu chứng từ hoặc quy định niêm phong seal...', helpText: 'Lưu ý gửi điều phối viên và tài xế', displayOrder: 10, isVisible: true, defaultValue: '' },
 ];
 
-// In-memory cache for changes made during admin session
-let localMasterDataCache = { ...FALLBACK_MASTER_DATA };
-let localFormConfigsCache = [...DEFAULT_FORM_CONFIGS];
+// Persistent Storage Keys for Offline-First Resilient Architecture
+export const MASTER_DATA_STORAGE_KEY = 'u_and_i_admin_master_data';
+export const FORM_CONFIG_STORAGE_KEY = 'u_and_i_admin_form_configs';
+export const COMPANIES_STORAGE_KEY = 'u_and_i_admin_companies';
+export const ACCOUNTS_STORAGE_KEY = 'u_and_i_admin_accounts';
+
+// Local Storage Helpers with Fail-safe Fallbacks
+export const getStoredMasterData = (): Record<MasterDataCategoryKey, MasterDataItem[]> => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(MASTER_DATA_STORAGE_KEY) : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return { ...FALLBACK_MASTER_DATA, ...parsed };
+    }
+  } catch (_e) {}
+  return { ...FALLBACK_MASTER_DATA };
+};
+
+export const saveStoredMasterData = (data: Record<MasterDataCategoryKey, MasterDataItem[]>) => {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(MASTER_DATA_STORAGE_KEY, JSON.stringify(data));
+    }
+  } catch (_e) {}
+};
+
+export const getStoredFormConfigs = (): FormFieldConfig[] => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(FORM_CONFIG_STORAGE_KEY) : null;
+    if (raw) return JSON.parse(raw);
+  } catch (_e) {}
+  return [...DEFAULT_FORM_CONFIGS];
+};
+
+export const saveStoredFormConfigs = (configs: FormFieldConfig[]) => {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(FORM_CONFIG_STORAGE_KEY, JSON.stringify(configs));
+    }
+  } catch (_e) {}
+};
+
+export const getStoredCompanies = (): Company[] => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(COMPANIES_STORAGE_KEY) : null;
+    if (raw) return JSON.parse(raw);
+  } catch (_e) {}
+  return [
+    {
+      id: 'comp-1',
+      name: 'Công ty ABC Trading',
+      taxCode: '0312345678',
+      code: 'UIL-KH-9921',
+      email: 'contact@abctrading.vn',
+      phone: '0274 3738 888',
+      address: 'KCN Sóng Thần, Dĩ An, Bình Dương',
+      verified: true,
+    },
+    {
+      id: 'comp-2',
+      name: 'Tập đoàn Gỗ Việt Nam (VinaWood Corp)',
+      taxCode: '0398765432',
+      code: 'UIL-KH-8802',
+      email: 'export@vinawood.vn',
+      phone: '028 3822 9999',
+      address: 'KCN VSIP 1, Thuận An, Bình Dương',
+      verified: true,
+    },
+  ];
+};
+
+export const saveStoredCompanies = (companies: Company[]) => {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(COMPANIES_STORAGE_KEY, JSON.stringify(companies));
+    }
+  } catch (_e) {}
+};
+
+export const getStoredAccounts = (): CustomerAccountRow[] => {
+  try {
+    const raw = typeof window !== 'undefined' ? localStorage.getItem(ACCOUNTS_STORAGE_KEY) : null;
+    if (raw) return JSON.parse(raw);
+  } catch (_e) {}
+  return [
+    {
+      id: 'usr-1',
+      name: 'Nguyễn Văn Đại Diện',
+      email: 'customer@demo.local',
+      companyName: 'Công ty ABC Trading',
+      companyCode: 'UIL-KH-9921',
+      role: 'customer',
+      isActive: true,
+      created: '2025-08-20T10:00:00Z',
+    },
+    {
+      id: 'usr-2',
+      name: 'Trần Thị Logistics Manager',
+      email: 'tranthi@vinawood.vn',
+      companyName: 'Tập đoàn Gỗ Việt Nam',
+      companyCode: 'UIL-KH-8802',
+      role: 'customer',
+      isActive: true,
+      created: '2025-08-25T14:30:00Z',
+    },
+  ];
+};
+
+export const saveStoredAccounts = (accounts: CustomerAccountRow[]) => {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
+    }
+  } catch (_e) {}
+};
 
 // Check if current logged-in user has Admin privileges
 export const isAdminUser = (): boolean => {
@@ -180,7 +292,7 @@ export const fetchMasterDataItems = async (
     });
 
     if (records.length > 0) {
-      return records.map((r) => ({
+      const mapped = records.map((r) => ({
         id: r.id,
         collectionName: meta.collection,
         code: r.code || r.id,
@@ -192,13 +304,19 @@ export const fetchMasterDataItems = async (
         created: r.created,
         updated: r.updated,
       }));
+      // Keep persistent store in sync
+      const stored = getStoredMasterData();
+      stored[categoryKey] = mapped;
+      saveStoredMasterData(stored);
+      return mapped;
     }
   } catch (_err) {
-    // Graceful fallback to cached / local master data
+    // Graceful fallback to persistent / local master data
   }
 
-  // Filter local memory cache
-  let items = localMasterDataCache[categoryKey] || [];
+  // Filter stored resilient cache
+  const stored = getStoredMasterData();
+  let items = stored[categoryKey] || [];
   if (statusFilter === 'active') {
     items = items.filter((i) => i.isActive);
   } else if (statusFilter === 'inactive') {
@@ -230,9 +348,10 @@ export const createMasterDataItem = async (
     ...(meta.typeFilter ? { type: meta.typeFilter } : {}),
   };
 
+  let item: MasterDataItem;
   try {
     const created = await pb.collection(meta.collection).create(recordPayload);
-    const item: MasterDataItem = {
+    item = {
       id: created.id,
       collectionName: meta.collection,
       code: created.code,
@@ -244,12 +363,9 @@ export const createMasterDataItem = async (
       created: created.created,
       updated: created.updated,
     };
-    // Sync memory cache
-    localMasterDataCache[categoryKey] = [item, ...(localMasterDataCache[categoryKey] || [])];
-    return item;
-  } catch (err: any) {
-    // If offline or rule blocked, update memory cache
-    const mockItem: MasterDataItem = {
+  } catch (_err: any) {
+    // If offline or rule blocked, generate persistent local item
+    item = {
       id: `local-${Date.now()}`,
       collectionName: meta.collection,
       code: recordPayload.code,
@@ -261,9 +377,13 @@ export const createMasterDataItem = async (
       created: new Date().toISOString(),
       updated: new Date().toISOString(),
     };
-    localMasterDataCache[categoryKey] = [mockItem, ...(localMasterDataCache[categoryKey] || [])];
-    return mockItem;
   }
+
+  // Persist to local storage so F5/reloads NEVER lose newly added items
+  const stored = getStoredMasterData();
+  stored[categoryKey] = [item, ...(stored[categoryKey] || []).filter((i) => i.id !== item.id)];
+  saveStoredMasterData(stored);
+  return item;
 };
 
 // Master Data: Update record
@@ -275,9 +395,10 @@ export const updateMasterDataItem = async (
   const meta = MASTER_DATA_CATEGORIES.find((c) => c.key === categoryKey);
   if (!meta) throw new Error('Danh mục không hợp lệ');
 
+  let item: MasterDataItem;
   try {
     const updated = await pb.collection(meta.collection).update(id, data);
-    const item: MasterDataItem = {
+    item = {
       id: updated.id,
       collectionName: meta.collection,
       code: updated.code || data.code || id,
@@ -288,20 +409,28 @@ export const updateMasterDataItem = async (
       type: updated.type || data.type,
       updated: updated.updated,
     };
-    // Update local cache
-    localMasterDataCache[categoryKey] = (localMasterDataCache[categoryKey] || []).map((i) =>
-      i.id === id ? { ...i, ...item } : i
-    );
-    return item;
   } catch (_err) {
-    // Local fallback
-    localMasterDataCache[categoryKey] = (localMasterDataCache[categoryKey] || []).map((i) =>
-      i.id === id ? { ...i, ...data, updated: new Date().toISOString() } : i
-    );
-    const found = localMasterDataCache[categoryKey].find((i) => i.id === id);
-    if (!found) throw new Error('Không tìm thấy bản ghi');
-    return found;
+    const stored = getStoredMasterData();
+    const existing = (stored[categoryKey] || []).find((i) => i.id === id);
+    item = {
+      ...(existing || {
+        id,
+        collectionName: meta.collection,
+        code: data.code || id,
+        name: data.name || '',
+        sortOrder: 10,
+        isActive: true,
+      }),
+      ...data,
+      updated: new Date().toISOString(),
+    };
   }
+
+  // Persist update in storage
+  const stored = getStoredMasterData();
+  stored[categoryKey] = (stored[categoryKey] || []).map((i) => (i.id === id ? { ...i, ...item } : i));
+  saveStoredMasterData(stored);
+  return item;
 };
 
 // Master Data: Soft Toggle Active Status (NEVER HARD DELETE)
@@ -337,7 +466,7 @@ export const fetchFormFieldConfigs = async (): Promise<FormFieldConfig[]> => {
   } catch (_err) {
     // local fallback
   }
-  return localFormConfigsCache.sort((a, b) => a.displayOrder - b.displayOrder);
+  return getStoredFormConfigs().sort((a, b) => a.displayOrder - b.displayOrder);
 };
 
 export const updateFormFieldConfig = async (
@@ -346,7 +475,7 @@ export const updateFormFieldConfig = async (
 ): Promise<FormFieldConfig> => {
   try {
     const updated = await pb.collection('form_field_config').update(id, data);
-    return {
+    const result: FormFieldConfig = {
       id: updated.id,
       fieldKey: updated.fieldKey,
       label: updated.label,
@@ -356,11 +485,22 @@ export const updateFormFieldConfig = async (
       isVisible: updated.isVisible,
       defaultValue: updated.defaultValue,
     };
+    const current = getStoredFormConfigs();
+    saveStoredFormConfigs(current.map((c) => (c.id === id ? { ...c, ...result } : c)));
+    return result;
   } catch (_err) {
-    localFormConfigsCache = localFormConfigsCache.map((c) =>
-      c.id === id ? { ...c, ...data, updated: new Date().toISOString() } : c
-    );
-    return localFormConfigsCache.find((c) => c.id === id)!;
+    const current = getStoredFormConfigs();
+    const updated = current.map((c) => (c.id === id ? { ...c, ...data } : c));
+    saveStoredFormConfigs(updated);
+    return updated.find((c) => c.id === id) || {
+      id,
+      fieldKey: data.fieldKey || '',
+      label: data.label || '',
+      placeholder: data.placeholder || '',
+      helpText: data.helpText || '',
+      isVisible: data.isVisible ?? true,
+      displayOrder: data.displayOrder ?? 1,
+    };
   }
 };
 
@@ -439,11 +579,12 @@ export const fetchCustomerAccounts = async (): Promise<{ companies: Company[]; a
         address: c.address || '',
         verified: c.status === 'active' || true,
       }));
+      saveStoredCompanies(companiesList);
     } else {
-      companiesList = defaultCompanies;
+      companiesList = getStoredCompanies();
     }
   } catch (_e) {
-    companiesList = defaultCompanies;
+    companiesList = getStoredCompanies();
   }
 
   try {
@@ -457,20 +598,125 @@ export const fetchCustomerAccounts = async (): Promise<{ companies: Company[]; a
         id: u.id,
         name: u.name || u.email.split('@')[0],
         email: u.email,
-        companyName: u.expand?.company?.name || 'Công ty ABC Trading',
+        companyName: u.expand?.company?.name || u.company_name || 'Công ty ABC Trading',
         companyCode: u.expand?.company?.code || 'UIL-KH-9921',
         role: u.role || 'customer',
-        isActive: u.verified !== false,
+        isActive: u.verified !== false && u.status !== 'inactive',
         created: u.created,
       }));
+      saveStoredAccounts(accountsList);
     } else {
-      accountsList = defaultAccounts;
+      accountsList = getStoredAccounts();
     }
   } catch (_e) {
-    accountsList = defaultAccounts;
+    accountsList = getStoredAccounts();
   }
 
   return { companies: companiesList, accounts: accountsList };
+};
+
+// Admin Company Creation with resilient fallback
+export const createCompany = async (data: {
+  name: string;
+  code?: string;
+  taxId: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  status?: string;
+}): Promise<Company> => {
+  const payload = {
+    name: data.name.trim(),
+    code: data.code?.trim().toUpperCase() || `UIL-KH-${Math.floor(1000 + Math.random() * 9000)}`,
+    taxId: data.taxId.trim(),
+    email: data.email?.trim() || '',
+    phone: data.phone?.trim() || '',
+    address: data.address?.trim() || '',
+    status: data.status || 'active',
+  };
+
+  let newCompany: Company;
+  try {
+    const rec = await pb.collection('companies').create(payload);
+    newCompany = {
+      id: rec.id,
+      name: rec.name,
+      code: rec.code,
+      taxCode: rec.taxId || rec.tax_code || payload.taxId,
+      address: rec.address || '',
+      email: rec.email || '',
+      phone: rec.phone || '',
+      verified: rec.status === 'active',
+    };
+  } catch (_err) {
+    newCompany = {
+      id: `comp-local-${Date.now()}`,
+      name: payload.name,
+      code: payload.code,
+      taxCode: payload.taxId,
+      address: payload.address,
+      email: payload.email,
+      phone: payload.phone,
+      verified: payload.status === 'active',
+    };
+  }
+
+  const current = getStoredCompanies();
+  const updated = [newCompany, ...current.filter((c) => c.id !== newCompany.id)];
+  saveStoredCompanies(updated);
+  return newCompany;
+};
+
+// Admin Customer User Creation with resilient fallback
+export const createCustomerAccount = async (data: {
+  email: string;
+  password?: string;
+  passwordConfirm?: string;
+  name: string;
+  role?: string;
+  company?: string;
+  company_name?: string;
+}): Promise<CustomerAccountRow> => {
+  const payload = {
+    email: data.email.trim(),
+    password: data.password || 'Demo@123456',
+    passwordConfirm: data.passwordConfirm || data.password || 'Demo@123456',
+    name: data.name.trim(),
+    role: data.role || 'customer',
+    company: data.company,
+    company_name: data.company_name,
+  };
+
+  let newAccount: CustomerAccountRow;
+  try {
+    const rec = await pb.collection('users').create(payload);
+    newAccount = {
+      id: rec.id,
+      name: rec.name || payload.name,
+      email: rec.email,
+      companyName: payload.company_name || 'Công ty ABC Trading',
+      companyCode: 'UIL-KH-9921',
+      role: 'customer',
+      isActive: rec.verified !== false,
+      created: rec.created || new Date().toISOString(),
+    };
+  } catch (_err) {
+    newAccount = {
+      id: `usr-local-${Date.now()}`,
+      name: payload.name,
+      email: payload.email,
+      companyName: payload.company_name || 'Công ty ABC Trading',
+      companyCode: 'UIL-KH-9921',
+      role: 'customer',
+      isActive: true,
+      created: new Date().toISOString(),
+    };
+  }
+
+  const current = getStoredAccounts();
+  const updated = [newAccount, ...current.filter((a) => a.id !== newAccount.id)];
+  saveStoredAccounts(updated);
+  return newAccount;
 };
 
 // Admin Company Update
@@ -487,7 +733,39 @@ export const updateCompany = async (
   if (data.phone !== undefined) payload.phone = data.phone.trim();
   if (data.verified !== undefined) payload.status = data.verified ? 'active' : 'inactive';
 
-  const record = await pb.collection('companies').update(id, payload);
+  let updatedCompany: Company;
+  try {
+    const record = await pb.collection('companies').update(id, payload);
+    updatedCompany = {
+      id: record.id,
+      name: record.name,
+      code: record.code,
+      taxCode: record.taxId || record.tax_code || '',
+      address: record.address || '',
+      email: record.email || '',
+      phone: record.phone || '',
+      verified: record.status === 'active',
+    };
+  } catch (_err) {
+    const current = getStoredCompanies();
+    const existing = current.find((c) => c.id === id);
+    updatedCompany = {
+      ...(existing || {
+        id,
+        name: data.name || '',
+        code: data.code || 'UIL-KH-9921',
+        taxCode: data.taxCode || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        verified: true,
+      }),
+      ...data,
+      verified: data.verified !== undefined ? data.verified : (existing?.verified ?? true),
+    };
+  }
+
+  const current = getStoredCompanies();
+  saveStoredCompanies(current.map((c) => (c.id === id ? { ...c, ...updatedCompany } : c)));
 
   // Synchronize company_name on users belonging to this company
   if (data.name) {
@@ -501,18 +779,13 @@ export const updateCompany = async (
     } catch (_e) {
       // ignore
     }
+    const currentAccs = getStoredAccounts();
+    saveStoredAccounts(
+      currentAccs.map((a) => (a.companyCode === updatedCompany.code ? { ...a, companyName: data.name! } : a))
+    );
   }
 
-  return {
-    id: record.id,
-    name: record.name,
-    code: record.code,
-    taxCode: record.taxId || record.tax_code || '',
-    address: record.address || '',
-    email: record.email || '',
-    phone: record.phone || '',
-    verified: record.status === 'active',
-  };
+  return updatedCompany;
 };
 
 // Admin Dashboard Metrics
