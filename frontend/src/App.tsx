@@ -16,11 +16,13 @@ import { CustomerManagementPage } from './features/admin/CustomerManagementPage'
 import { FormConfigPage } from './features/admin/FormConfigPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RegistrationsPage } from './features/admin/RegistrationsPage';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <Routes>
+      <ErrorBoundary fallbackTitle="Không thể tải ứng dụng">
+        <Routes>
         {/* Full-width Screen 1: Login & Registration */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -115,7 +117,8 @@ export const App: React.FC = () => {
         {/* Fallback to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </ErrorBoundary>
+  </BrowserRouter>
   );
 };
 

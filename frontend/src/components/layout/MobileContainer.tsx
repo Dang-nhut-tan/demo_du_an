@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Smartphone, Monitor, Download } from 'lucide-react';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 
 interface MobileContainerProps {
   children: React.ReactNode;
@@ -105,7 +106,9 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
               : 'h-full w-full max-w-md md:max-w-xl lg:max-w-2xl md:rounded-3xl shadow-xl overflow-hidden bg-[#f8fafc]'
           } max-md:h-[100dvh] max-md:!w-full max-md:!min-w-0 max-md:!max-w-none max-md:rounded-none max-md:border-0 max-md:shadow-none max-md:p-0`}
         >
-          {children}
+          <ErrorBoundary fallbackTitle="Không thể hiển thị màn hình này">
+            {children}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

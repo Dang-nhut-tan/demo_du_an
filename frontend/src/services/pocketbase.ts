@@ -17,12 +17,8 @@ export const getPocketBaseUrl = (): string => {
   }
 
   if (import.meta.env.PROD) {
-    console.error(
-      '[PocketBase Config Warning] Biến môi trường VITE_POCKETBASE_URL chưa được thiết lập trong môi trường Production!\n' +
-      'Vui lòng bổ sung VITE_POCKETBASE_URL trong Render Dashboard > Static Site Settings > Environment Variables.'
-    );
-    // In production without configured backend, default to current origin (safe for reverse proxy architectures)
-    return typeof window !== 'undefined' ? window.location.origin : '';
+    // In production, default to deployed Render PocketBase backend
+    return 'https://demo-du-an-1.onrender.com';
   }
 
   // Development fallback for local emulator
@@ -169,12 +165,14 @@ export const getCurrentUser = (): User => {
       company: 'Công ty ABC Trading',
     };
   }
+  const email = (model.email || '').toString();
+  const fallbackName = email ? email.split('@')[0] : 'Khách hàng';
   return {
     id: model.id,
-    email: model.email,
-    name: model.name || model.email.split('@')[0],
+    email: email,
+    name: model.name || fallbackName,
     role: model.role || 'customer',
-    company: model.company_name || 'Công ty ABC Trading',
+    company: model.company_name || model.company || 'Công ty ABC Trading',
     avatar: model.avatar ? pb.files.getUrl(model, model.avatar) : undefined,
   };
 };
